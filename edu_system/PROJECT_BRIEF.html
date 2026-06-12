@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @page { margin: 2cm; }
+  body { font-family: 'Liberation Sans', Arial, sans-serif; color: #1e293b; line-height: 1.5; font-size: 11pt; }
+  h1 { color: #1d4ed8; font-size: 24pt; margin-bottom: 0; }
+  .sub { color: #64748b; font-size: 12pt; margin-top: 4px; }
+  h2 { color: #1d4ed8; border-bottom: 2px solid #e2e8f0; padding-bottom: 4px; margin-top: 22px; }
+  h3 { color: #1e3a8a; margin-bottom: 4px; }
+  .box { background: #f1f5f9; border-left: 4px solid #2563eb; padding: 10px 14px; margin: 12px 0; }
+  .arabic { font-size: 13pt; direction: rtl; text-align: right; font-family: 'Liberation Serif', serif; }
+  ul { margin-top: 4px; }
+  li { margin: 3px 0; }
+  table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 10pt; }
+  th, td { border: 1px solid #cbd5e1; padding: 6px 8px; text-align: left; vertical-align: top; }
+  th { background: #eef2ff; color: #1e3a8a; }
+  .tag { background: #eef2ff; color: #1d4ed8; border-radius: 10px; padding: 1px 8px; font-size: 9pt; }
+  code { background: #e2e8f0; padding: 1px 5px; border-radius: 4px; font-size: 9.5pt; }
+  .foot { color: #64748b; font-size: 9pt; margin-top: 24px; border-top: 1px solid #e2e8f0; padding-top: 8px; }
+</style>
+</head>
+<body>
+
+<h1>Educational System — Project Brief</h1>
+<p class="sub">A draft / concept document to share with a developer &middot; Prepared 12 June 2026</p>
+
+<div class="box">
+<b>What this is:</b> An early <b>draft</b> of an AI-assisted learning platform with
+two main sections — one for <b>teachers</b> and one for <b>students</b>. This document
+explains the idea, the features, and what already exists, so a developer can pick it up
+and build the full version.
+</div>
+
+<h2>The Vision</h2>
+<p>A single platform where <b>teachers</b> upload their curriculum materials (learning
+outcomes and past papers), and an <b>AI</b> uses those to automatically generate
+practice questions and teaching material that stays true to the syllabus. <b>Students</b>
+then get personalised language-learning tools, an Arabic citations collection, and
+detailed AI feedback on their work.</p>
+
+<h2>Section 1 &mdash; Teachers</h2>
+<p>The teacher logs in and, for each subject, follows this flow:</p>
+<ul>
+  <li><b>1. Upload the learning outcome</b> of the subject (paste text or upload a file).</li>
+  <li><b>2. AI analyses the outcome</b> &mdash; breaks it into topics &amp; competencies and
+      <b>generates questions aligned to those outcomes</b>.</li>
+  <li><b>3. Upload past papers</b> of the subject.</li>
+  <li><b>4. AI uses outcome + past papers</b> to generate fresh exam-style questions and to
+      <b>teach the curriculum</b>, staying within what was taught.</li>
+</ul>
+<p>For language subjects, teachers also upload the material students will use:</p>
+<ul>
+  <li><b>Shadowing audio</b> &mdash; teachers upload the <code>.mp3</code> files.</li>
+  <li><b>Practice material</b> for the four skills: <b>reading, writing, listening, speaking</b>.</li>
+</ul>
+
+<h2>Section 2 &mdash; Students</h2>
+
+<h3>Language tools</h3>
+<ul>
+  <li><b>Personal dictionary</b> &mdash; every student has their own private vocabulary collection.</li>
+  <li><b>Shadowing</b> &mdash; listen to and repeat the audio clips uploaded by teachers.</li>
+  <li><b>Reading / Writing / Listening / Speaking</b> practice &mdash; using the material
+      uploaded by teachers in their section.</li>
+</ul>
+
+<h3>Arabic &mdash; Citations collection (الاستشهادات)</h3>
+<p class="arabic">قسم خاص بالاستشهادات: أحاديث نبوية وآيات قرآنية للكتابة &mdash; مثل القاموس
+الشخصي، لكن للاستشهادات فقط.</p>
+<ul>
+  <li>A personal collection (like the dictionary) but dedicated to <b>Qur'anic verses (آيات)
+      and Hadith (أحاديث)</b> that the student can reuse when writing.</li>
+  <li>Each entry stores the text, its reference (sura/verse or narrator/source), and a note
+      on when to use it.</li>
+</ul>
+
+<h3>Detailed feedback (any subject)</h3>
+<ul>
+  <li>A student submits their work for <b>any</b> subject and receives <b>detailed,
+      criterion-by-criterion AI feedback</b> plus a score.</li>
+</ul>
+
+<h2>What already exists (the draft)</h2>
+<p>A working prototype has been built so the structure is concrete and reviewable:</p>
+<ul>
+  <li>Full backend with login, teacher &amp; student sections, file uploads, and a database
+      covering every feature above.</li>
+  <li>Web pages for each screen (including a right-to-left Arabic page for the استشهادات).</li>
+  <li>The AI parts are <b>stubbed</b> (placeholder logic) with <b>clearly marked points</b>
+      where a real AI model plugs in &mdash; this is the main thing a developer would complete.</li>
+  <li>Automated tests covering the main flows (all passing).</li>
+</ul>
+
+<table>
+  <tr><th>Area</th><th>Status in the draft</th></tr>
+  <tr><td>Teacher login, subjects, outcome &amp; past-paper upload</td><td>Built</td></tr>
+  <tr><td>Auto question generation from outcomes / past papers</td><td>Built (AI stubbed)</td></tr>
+  <tr><td>Shadowing audio + 4-skills practice upload</td><td>Built</td></tr>
+  <tr><td>Student personal dictionary</td><td>Built</td></tr>
+  <tr><td>Arabic الاستشهادات collection</td><td>Built</td></tr>
+  <tr><td>Detailed feedback on submissions</td><td>Built (AI stubbed)</td></tr>
+  <tr><td>Real AI model integration</td><td>To do (developer)</td></tr>
+</table>
+
+<h2>For the developer</h2>
+<p>The full source code is on GitHub &mdash; the application is in the <code>edu_system/</code> folder:</p>
+<div class="box">
+<b>Repository:</b> https://github.com/kimooaza-max/bustub<br>
+<b>App folder:</b> <code>edu_system/</code> &nbsp;|&nbsp; <b>Read first:</b> <code>edu_system/README.md</code>
+</div>
+<p><b>Tech:</b> Python (FastAPI) + SQLite, server-rendered HTML. Built to run with one
+command (<code>./run.sh</code>) or deploy to any host.</p>
+<p><b>Suggested next steps for the developer:</b></p>
+<ul>
+  <li>Replace the stubbed AI with a real model (outcome analysis, question generation, feedback) &mdash;
+      every spot is marked with a <code>SWAP-IN</code> comment in <code>edu_system/app/ai/stub.py</code>.</li>
+  <li>Add PDF/Word text extraction for uploaded outcomes &amp; past papers.</li>
+  <li>Harden login &amp; file handling; move from SQLite to a managed database.</li>
+  <li>Add progress tracking, spaced-repetition for the dictionary, and speech scoring for
+      shadowing &amp; speaking.</li>
+</ul>
+
+<p class="foot">This is a concept draft intended to communicate the product vision. Features,
+naming, and scope are open to change once a developer estimates the full build.</p>
+
+</body>
+</html>
