@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Educational System — Interactive Draft</title>
+<style>
+  :root{--bg:#0f172a;--brand:#2563eb;--brand2:#1d4ed8;--ink:#1e293b;--muted:#64748b;--line:#e2e8f0;--tag:#eef2ff;}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ink);background:#f1f5f9;line-height:1.5}
+  header{display:flex;align-items:center;justify-content:space-between;padding:.7rem 1rem;background:var(--bg);color:#fff;flex-wrap:wrap;gap:.5rem}
+  header .brand{font-weight:700}
+  nav button{background:transparent;border:1px solid #334155;color:#fff;border-radius:8px;padding:.4rem .7rem;margin-left:.3rem;font:inherit;cursor:pointer}
+  nav button.active{background:var(--brand);border-color:var(--brand)}
+  main{max-width:820px;margin:1.2rem auto;padding:0 1rem}
+  .view{display:none}.view.active{display:block}
+  .panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:1.2rem;margin-bottom:1rem}
+  h1{margin:.2rem 0}h2{color:var(--brand2);margin:.2rem 0 .6rem}
+  h3{margin:.2rem 0}
+  .tag{background:var(--tag);color:var(--brand2);border-radius:999px;font-size:.72rem;padding:.1rem .55rem;margin-left:.3rem}
+  label{display:block;font-size:.9rem;font-weight:600;margin:.5rem 0 .2rem}
+  input,textarea,select{width:100%;padding:.5rem .6rem;border:1px solid var(--line);border-radius:8px;font:inherit;background:#fff}
+  button.btn{background:var(--brand);color:#fff;border:0;border-radius:8px;padding:.55rem 1rem;font:inherit;font-weight:600;cursor:pointer;margin-top:.6rem}
+  button.btn:hover{background:var(--brand2)}
+  .cards{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+  .card{border:1px solid var(--line);border-radius:10px;padding:1rem;cursor:pointer;background:#fff}
+  .card:hover{border-color:var(--brand)}
+  .muted{color:var(--muted);font-size:.9rem}
+  .item{border-top:1px solid var(--line);padding:.6rem 0}
+  .item:first-child{border-top:0}
+  .pill{display:inline-block;background:#f1f5f9;border-radius:6px;padding:.05rem .45rem;font-size:.78rem;margin-right:.3rem}
+  .rtl{direction:rtl;text-align:right}
+  .demoflag{background:#fef9c3;color:#854d0e;border:1px solid #fde68a;border-radius:8px;padding:.5rem .7rem;font-size:.85rem;margin-bottom:1rem}
+  .skill{color:var(--brand2);text-transform:capitalize;margin-top:.6rem}
+  .score{font-weight:700;font-size:1.1rem;color:var(--brand2)}
+  pre{white-space:pre-wrap;background:#f8fafc;border:1px solid var(--line);border-radius:8px;padding:.7rem;font-size:.85rem}
+  footer{text-align:center;color:var(--muted);font-size:.8rem;padding:1.5rem}
+  .row{display:flex;gap:.6rem}.row>*{flex:1}
+</style>
+</head>
+<body>
+<header>
+  <span class="brand">📚 EduSystem <span class="tag">interactive draft</span></span>
+  <nav>
+    <button data-view="home" class="active">Home</button>
+    <button data-view="teacher">Teacher</button>
+    <button data-view="student">Student</button>
+  </nav>
+</header>
+
+<main>
+  <div class="demoflag">⚠️ This is an interactive <b>concept draft</b>. It runs entirely in your browser (data is saved on this device only). The AI replies are illustrative placeholders — a developer would connect a real AI model.</div>
+
+  <!-- HOME -->
+  <section id="home" class="view active">
+    <div class="panel">
+      <h1>Educational System</h1>
+      <p class="muted">A two-section AI-assisted learning platform. Tap a card to explore.</p>
+      <div class="cards">
+        <div class="card" onclick="show('teacher')"><h2>👩‍🏫 Teachers</h2><p>Upload each subject's <b>outcome</b> &amp; <b>past papers</b>; the AI generates aligned questions and can teach the curriculum. Upload shadowing audio &amp; skills practice.</p></div>
+        <div class="card" onclick="show('student')"><h2>🧑‍🎓 Students</h2><p>Personal dictionary, shadowing, reading/writing/listening/speaking practice, Arabic <b>استشهادات</b>, and detailed feedback on any subject.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TEACHER -->
+  <section id="teacher" class="view">
+    <div class="panel">
+      <h2>👩‍🏫 Teacher — Subject setup</h2>
+      <p class="muted">Step 1 &amp; 2: paste the learning outcome → the AI analyses it and generates aligned questions.</p>
+      <label>Learning outcome (one topic per line)</label>
+      <textarea id="outcome" rows="5" placeholder="e.g.&#10;Cell structure and function&#10;Photosynthesis&#10;Genetics: inheritance basics"></textarea>
+      <button class="btn" onclick="genFromOutcome()">Analyse outcome &amp; generate questions</button>
+
+      <div id="outcomeResult"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Past papers</h2>
+      <p class="muted">Step 3 &amp; 4: paste past-paper text → fresh exam-style questions within the curriculum.</p>
+      <label>Past paper text</label>
+      <textarea id="paper" rows="3" placeholder="Paste a few past-paper questions or topics…"></textarea>
+      <button class="btn" onclick="genFromPaper()">Generate exam-style questions</button>
+      <div id="paperResult"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Language material <span class="tag">for students</span></h2>
+      <p class="muted">Teachers upload shadowing audio (mp3) and reading/writing/listening/speaking practice. (Upload is illustrative in this draft.)</p>
+      <div class="row">
+        <div><label>Shadowing clip title</label><input id="shTitle" placeholder="Daily conversation #1"></div>
+        <div><label>Skill</label><select id="prSkill"><option>reading</option><option>writing</option><option>listening</option><option>speaking</option></select></div>
+      </div>
+      <button class="btn" onclick="addMaterial()">Add material</button>
+      <div id="materialList"></div>
+    </div>
+  </section>
+
+  <!-- STUDENT -->
+  <section id="student" class="view">
+    <div class="panel">
+      <h2>📒 Personal dictionary</h2>
+      <div class="row">
+        <div><label>Word / term</label><input id="dTerm" placeholder="ubiquitous"></div>
+        <div><label>Language</label><input id="dLang" placeholder="English"></div>
+      </div>
+      <label>Meaning</label><input id="dMean" placeholder="present everywhere">
+      <button class="btn" onclick="addWord()">Add to my dictionary</button>
+      <div id="dictList"></div>
+    </div>
+
+    <div class="panel rtl">
+      <h2>📖 الاستشهادات</h2>
+      <p class="muted">قاموس شخصي للآيات القرآنية والأحاديث النبوية لاستخدامها في الكتابة.</p>
+      <label>النوع</label>
+      <select id="iKind"><option value="ayah">آية قرآنية</option><option value="hadith">حديث نبوي</option></select>
+      <label>النص</label><textarea id="iText" rows="2" placeholder="اكتب النص هنا"></textarea>
+      <label>المرجع</label><input id="iRef" placeholder="السورة/رقم الآية أو الراوي">
+      <button class="btn" onclick="addCite()">إضافة</button>
+      <div id="citeList"></div>
+    </div>
+
+    <div class="panel">
+      <h2>🎧 Shadowing &amp; skills practice</h2>
+      <p class="muted">Students use the material teachers uploaded.</p>
+      <div id="studentMaterial"><p class="muted">No material yet — add some from the Teacher tab.</p></div>
+    </div>
+
+    <div class="panel">
+      <h2>📝 Detailed feedback (any subject)</h2>
+      <label>Your work</label>
+      <textarea id="work" rows="4" placeholder="Write or paste your answer / essay…"></textarea>
+      <button class="btn" onclick="getFeedback()">Submit &amp; get detailed feedback</button>
+      <div id="fbResult"></div>
+    </div>
+  </section>
+</main>
+
+<footer>Interactive concept draft · runs in-browser · source: github.com/kimooaza-max/bustub (edu_system/)</footer>
+
+<script>
+const S = {
+  get(k,d){try{return JSON.parse(localStorage.getItem(k))||d}catch(e){return d}},
+  set(k,v){localStorage.setItem(k,JSON.stringify(v))}
+};
+function show(v){
+  document.querySelectorAll('.view').forEach(e=>e.classList.toggle('active',e.id===v));
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===v));
+  if(v==='student') renderStudentMaterial();
+  window.scrollTo(0,0);
+}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>show(b.dataset.view));
+
+function topics(text){
+  return text.split('\n').map(s=>s.replace(/^[\s\-*•\d.)]+/,'').trim()).filter(s=>s.length>2);
+}
+function qHTML(list){
+  if(!list.length) return '<p class="muted">Enter some text above first.</p>';
+  return '<h3>AI-generated questions</h3>'+list.map((q,i)=>
+    `<div class="item"><span class="pill">${q.diff}</span><b>${q.prompt}</b><div class="muted">Model answer: ${q.ans}</div></div>`).join('');
+}
+function genFromOutcome(){
+  const t=topics(document.getElementById('outcome').value);
+  const diff=['easy','medium','hard'];
+  const qs=(t.length?t:['General concepts']).slice(0,6).map((tp,i)=>({diff:diff[i%3],
+    prompt:`Explain and give an example of: ${tp}`,
+    ans:`A full answer covers ${tp} with a definition, an example, and a common misconception.`}));
+  document.getElementById('outcomeResult').innerHTML=qHTML(qs);
+}
+function genFromPaper(){
+  const t=topics(document.getElementById('paper').value);
+  const qs=(t.length?t:['Course topic']).slice(0,5).map(tp=>({diff:'medium',
+    prompt:`(exam-style) Question on: ${tp}`,ans:`Worked solution for ${tp}.`}));
+  document.getElementById('paperResult').innerHTML=qHTML(qs);
+}
+function addMaterial(){
+  const m=S.get('material',[]);
+  const title=document.getElementById('shTitle').value.trim();
+  const skill=document.getElementById('prSkill').value;
+  if(title) m.push({type:'shadowing',title});
+  m.push({type:'practice',skill,title:title||(skill+' practice')});
+  S.set('material',m);document.getElementById('shTitle').value='';renderMaterial();
+}
+function renderMaterial(){
+  const m=S.get('material',[]);
+  document.getElementById('materialList').innerHTML = m.length?
+    '<h3>Added material</h3>'+m.map(x=>`<div class="item"><span class="pill">${x.type==='shadowing'?'🎧 shadowing':x.skill}</span>${x.title}</div>`).join('')
+    :'';
+}
+function renderStudentMaterial(){
+  const m=S.get('material',[]);
+  const sk=['reading','writing','listening','speaking'];
+  let html='';
+  const sh=m.filter(x=>x.type==='shadowing');
+  html+='<h3 class="skill">🎧 shadowing</h3>'+(sh.length?sh.map(x=>`<div class="item">${x.title} <span class="muted">(audio clip)</span></div>`).join(''):'<p class="muted">none yet</p>');
+  sk.forEach(s=>{const items=m.filter(x=>x.type==='practice'&&x.skill===s);
+    html+=`<h3 class="skill">${s}</h3>`+(items.length?items.map(x=>`<div class="item">${x.title}</div>`).join(''):'<p class="muted">none yet</p>');});
+  document.getElementById('studentMaterial').innerHTML=html;
+}
+function addWord(){
+  const d=S.get('dict',[]);const term=document.getElementById('dTerm').value.trim();
+  if(!term)return;
+  d.unshift({term,lang:document.getElementById('dLang').value,mean:document.getElementById('dMean').value});
+  S.set('dict',d);['dTerm','dLang','dMean'].forEach(i=>document.getElementById(i).value='');renderDict();
+}
+function renderDict(){
+  const d=S.get('dict',[]);
+  document.getElementById('dictList').innerHTML=d.length?d.map(w=>
+    `<div class="item"><b>${w.term}</b> <span class="pill">${w.lang||'—'}</span><div class="muted">${w.mean||''}</div></div>`).join('')
+    :'<p class="muted">Your dictionary is empty.</p>';
+}
+function addCite(){
+  const c=S.get('cite',[]);const text=document.getElementById('iText').value.trim();
+  if(!text)return;
+  c.unshift({kind:document.getElementById('iKind').value,text,ref:document.getElementById('iRef').value});
+  S.set('cite',c);['iText','iRef'].forEach(i=>document.getElementById(i).value='');renderCite();
+}
+function renderCite(){
+  const c=S.get('cite',[]);
+  document.getElementById('citeList').innerHTML=c.length?c.map(x=>
+    `<div class="item"><span class="pill">${x.kind==='ayah'?'آية':'حديث'}</span><b>${x.text}</b><div class="muted">${x.ref||''}</div></div>`).join('')
+    :'<p class="muted">لا توجد استشهادات بعد.</p>';
+}
+function getFeedback(){
+  const t=document.getElementById('work').value.trim();
+  const words=t?t.split(/\s+/).length:0;
+  const score=Math.max(0,Math.min(100,Math.round(40+Math.min(words,300)/6)));
+  const out=`Detailed feedback (criterion by criterion):
+
+• Content & accuracy: addresses the task; support claims with examples.
+• Structure & coherence: logical flow with clear paragraphing.
+• Language & mechanics: grammar, spelling, vocabulary range.
+• Alignment to outcomes: covers the targeted learning outcomes.
+
+Length: ~${words} words.
+Next steps: revise the weakest criterion above and resubmit.`;
+  document.getElementById('fbResult').innerHTML=
+    `<p class="score">Score: ${score}/100</p><pre>${out}</pre>`;
+}
+renderMaterial();renderDict();renderCite();
+</script>
+</body>
+</html>
