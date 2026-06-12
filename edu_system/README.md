@@ -46,6 +46,21 @@ Demo accounts (auto-seeded on first run):
 | teacher | `teacher` | `teacher123`|
 | student | `student` | `student123`|
 
+## Deploy to Render (open it from any device, incl. a tablet)
+
+This repo ships a `render.yaml` blueprint at its root. To get a public URL:
+
+1. Go to **[render.com](https://render.com)** and sign in with GitHub (free).
+2. **New +** → **Blueprint** → connect the `kimooaza-max/bustub` repo.
+3. Render reads `render.yaml`, builds, and deploys automatically.
+4. Open the URL it gives you (e.g. `https://edu-system.onrender.com`) in any
+   browser — phone, tablet, or computer.
+
+> **Note (free tier):** the service sleeps after ~15 min idle (first request
+> then takes ~30s to wake), and storage is **ephemeral** — the SQLite database
+> and uploaded files reset on each redeploy/restart. Fine for a draft demo; add
+> a managed Postgres + object storage before relying on it.
+
 ## Test
 
 ```bash

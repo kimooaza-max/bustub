@@ -1,0 +1,16 @@
+# Render Blueprint for the draft educational system (in edu_system/).
+# Deploy: on render.com -> New + -> Blueprint -> connect this repo.
+# Render reads this file from the repo root and provisions the service.
+services:
+  - type: web
+    name: edu-system
+    runtime: python
+    rootDir: edu_system          # the app lives in this subfolder of the repo
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.9"
+      - key: EDU_SECRET_KEY      # signs login cookies; Render generates a strong value
+        generateValue: true
