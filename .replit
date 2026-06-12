@@ -1,0 +1,12 @@
+modules = ["python-3.11"]
+
+# One green "Run" button: install deps, then start the app.
+run = "cd edu_system && pip install -r requirements.txt && uvicorn app.main:app --host 0.0.0.0 --port 3000"
+
+[nix]
+channel = "stable-24_05"
+
+# Expose the app's port to Replit's public webview URL.
+[[ports]]
+localPort = 3000
+externalPort = 80
