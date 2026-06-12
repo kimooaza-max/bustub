@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Feedback{% endblock %}
+{% block content %}
+<section class="panel">
+  <h1>📝 Detailed feedback</h1>
+  <p><a href="/student/subjects/{{ submission.subject_id }}">← back to subject</a></p>
+
+  <div class="block">
+    <h2>{{ submission.title or 'Your submission' }}</h2>
+    <p class="muted prewrap">{{ submission.content }}</p>
+  </div>
+
+  <div class="block highlight">
+    {% if feedback.score is not none %}<p class="score">Score: {{ feedback.score }}/100</p>{% endif %}
+    <p><b>Summary:</b> {{ feedback.summary }}</p>
+    <pre class="prewrap">{{ feedback.detailed }}</pre>
+  </div>
+</section>
+{% endblock %}

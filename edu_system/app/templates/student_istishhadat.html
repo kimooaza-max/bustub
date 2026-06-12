@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}استشهادات{% endblock %}
+{% block content %}
+<section class="panel" dir="rtl">
+  <h1>📖 الاستشهادات</h1>
+  <p class="hint">قاموس شخصي للآيات القرآنية والأحاديث النبوية لاستخدامها في الكتابة.</p>
+  <form method="post" action="/student/istishhadat">
+    <label>النوع
+      <select name="kind">
+        <option value="ayah">آية قرآنية</option>
+        <option value="hadith">حديث نبوي</option>
+      </select>
+    </label>
+    <label>النص <textarea name="text" rows="3" required></textarea></label>
+    <label>المرجع <input name="reference" placeholder="السورة/رقم الآية أو الراوي/المصدر"></label>
+    <label>متى تُستخدم <input name="usage_note"></label>
+    <button class="btn" type="submit">إضافة</button>
+  </form>
+
+  {% if entries %}
+  <ul class="list">
+    {% for e in entries %}
+    <li>
+      <span class="tag">{{ 'آية' if e.kind == 'ayah' else 'حديث' }}</span>
+      <b>{{ e.text }}</b>
+      {% if e.reference %}<div class="muted">المرجع: {{ e.reference }}</div>{% endif %}
+      {% if e.usage_note %}<div class="muted">الاستخدام: {{ e.usage_note }}</div>{% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}<p class="hint">لا توجد استشهادات بعد.</p>{% endif %}
+</section>
+{% endblock %}

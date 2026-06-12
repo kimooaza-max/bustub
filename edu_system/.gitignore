@@ -1,0 +1,9 @@
+# Runtime data — not committed
+uploads/
+*.db
+*.sqlite3
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Educational System (draft){% endblock %}</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/">📚 EduSystem <span class="tag">draft</span></a>
+    <nav>
+      {% if user %}
+        {% if user.role.value == 'teacher' %}
+          <a href="/teacher">Teacher</a>
+        {% else %}
+          <a href="/student">Student</a>
+          <a href="/student/dictionary">Dictionary</a>
+          <a href="/student/istishhadat">استشهادات</a>
+        {% endif %}
+        <span class="who">{{ user.full_name or user.username }}</span>
+        <a class="btn" href="/logout">Logout</a>
+      {% else %}
+        <a href="/login">Login</a>
+        <a class="btn" href="/register">Register</a>
+      {% endif %}
+    </nav>
+  </header>
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="foot">Draft educational system · AI features are stubbed.</footer>
+</body>
+</html>
