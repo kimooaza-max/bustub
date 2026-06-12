@@ -36,6 +36,10 @@
   pre{white-space:pre-wrap;background:#f8fafc;border:1px solid var(--line);border-radius:8px;padding:.7rem;font-size:.85rem}
   footer{text-align:center;color:var(--muted);font-size:.8rem;padding:1.5rem}
   .row{display:flex;gap:.6rem}.row>*{flex:1}
+  .chips{display:flex;flex-wrap:wrap;gap:.4rem;margin:.3rem 0 .8rem}
+  .chip{background:#f1f5f9;border:1px solid var(--line);border-radius:999px;padding:.35rem .8rem;font:inherit;cursor:pointer;color:var(--ink)}
+  .chip:hover{border-color:var(--brand)}
+  .chip.active{background:var(--brand);color:#fff;border-color:var(--brand)}
 </style>
 </head>
 <body>
@@ -99,6 +103,14 @@
   <!-- STUDENT -->
   <section id="student" class="view">
     <div class="panel">
+      <h2>📚 My subjects</h2>
+      <p class="muted">Choose your level, then a subject to work on.</p>
+      <div id="subjectsByLevel"></div>
+      <p id="currentSubjectBanner" class="muted">No subject selected yet.</p>
+      <p id="langNote" class="muted" style="display:none">🗣️ This is a language subject — use your <b>Personal dictionary</b> below, the <b>shadowing &amp; skills practice</b>, and (for Arabic) the <b>الاستشهادات</b> section.</p>
+    </div>
+
+    <div class="panel">
       <h2>📒 Personal dictionary</h2>
       <div class="row">
         <div><label>Word / term</label><input id="dTerm" placeholder="ubiquitous"></div>
@@ -127,7 +139,7 @@
     </div>
 
     <div class="panel">
-      <h2>📝 Detailed feedback (any subject)</h2>
+      <h2>📝 Detailed feedback<span id="fbSubject"></span></h2>
       <label>Your work</label>
       <textarea id="work" rows="4" placeholder="Write or paste your answer / essay…"></textarea>
       <button class="btn" onclick="getFeedback()">Submit &amp; get detailed feedback</button>
@@ -221,11 +233,38 @@ function renderCite(){
     `<div class="item"><span class="pill">${x.kind==='ayah'?'آية':'حديث'}</span><b>${x.text}</b><div class="muted">${x.ref||''}</div></div>`).join('')
     :'<p class="muted">لا توجد استشهادات بعد.</p>';
 }
+const LEVELS={
+  "Level 1":["English","Chemistry","ICT","Global (Past Papers)","Math","Arabic","Physics","Art","Geography"],
+  "Level 2":["Project Management","Math","Biology","Physics","English"],
+  "Level 3":["Math","Chemistry","Physics","Biology"]
+};
+const LANG_SUBJECTS=["English","Arabic"];
+function renderSubjects(){
+  let html='';
+  for(const lvl in LEVELS){
+    html+=`<h3 class="skill">${lvl}</h3><div class="chips">`+
+      LEVELS[lvl].map(s=>{
+        const key=lvl+' · '+s, lang=LANG_SUBJECTS.includes(s)?' 🗣️':'';
+        return `<button class="chip" data-key="${key}" data-name="${s}" onclick="selectSubject(this.dataset.key,this.dataset.name)">${s}${lang}</button>`;
+      }).join('')+`</div>`;
+  }
+  document.getElementById('subjectsByLevel').innerHTML=html;
+  const cur=S.get('subjectKey','');
+  if(cur){const el=document.querySelector('.chip[data-key="'+cur+'"]');if(el)selectSubject(cur,el.dataset.name);}
+}
+function selectSubject(key,name){
+  S.set('subjectKey',key);S.set('subject',name);
+  document.getElementById('currentSubjectBanner').innerHTML='Selected: <b>'+key+'</b>';
+  const sp=document.getElementById('fbSubject');if(sp)sp.textContent=' — '+name;
+  document.getElementById('langNote').style.display=LANG_SUBJECTS.includes(name)?'block':'none';
+  document.querySelectorAll('.chip').forEach(c=>c.classList.toggle('active',c.dataset.key===key));
+}
 function getFeedback(){
   const t=document.getElementById('work').value.trim();
   const words=t?t.split(/\s+/).length:0;
   const score=Math.max(0,Math.min(100,Math.round(40+Math.min(words,300)/6)));
-  const out=`Detailed feedback (criterion by criterion):
+  const subj=S.get('subject','(no subject selected)');
+  const out=`Subject: ${subj} — Detailed feedback (criterion by criterion):
 
 • Content & accuracy: addresses the task; support claims with examples.
 • Structure & coherence: logical flow with clear paragraphing.
@@ -237,7 +276,7 @@ Next steps: revise the weakest criterion above and resubmit.`;
   document.getElementById('fbResult').innerHTML=
     `<p class="score">Score: ${score}/100</p><pre>${out}</pre>`;
 }
-renderMaterial();renderDict();renderCite();
+renderMaterial();renderDict();renderCite();renderSubjects();
 </script>
 </body>
 </html>
