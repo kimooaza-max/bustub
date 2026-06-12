@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+  <h1>Educational System <span class="tag">draft</span></h1>
+  <p>A two-section learning platform.</p>
+  <div class="cards">
+    <div class="card">
+      <h2>👩‍🏫 Teachers</h2>
+      <p>Upload each subject's <b>outcome</b> and <b>past papers</b>. The AI
+         analyses them to generate aligned questions and teaching material.</p>
+    </div>
+    <div class="card">
+      <h2>🧑‍🎓 Students</h2>
+      <p>Personal dictionary, shadowing (mp3), reading/writing/listening/speaking
+         practice, Arabic <b>استشهادات</b>, and detailed feedback on any subject.</p>
+    </div>
+  </div>
+  {% if not user %}
+  <p class="hint">Demo accounts — teacher / <code>teacher123</code>,
+     student / <code>student123</code>.</p>
+  <a class="btn big" href="/login">Login</a>
+  {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="panel">
+  <h1>Teacher dashboard</h1>
+  <h2>Your subjects</h2>
+  {% if subjects %}
+  <ul class="list">
+    {% for s in subjects %}
+    <li><a href="/teacher/subjects/{{ s.id }}">{{ s.name }}</a>
+      {% if s.is_language %}<span class="tag">language: {{ s.language }}</span>{% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="hint">No subjects yet. Create one below.</p>
+  {% endif %}
+
+  <h2>Add a subject</h2>
+  <form method="post" action="/teacher/subjects">
+    <label>Subject name <input name="name" required></label>
+    <label>Language (if any) <input name="language" placeholder="English / Arabic / …"></label>
+    <label class="check"><input type="checkbox" name="is_language" value="true"> This is a language subject</label>
+    <button class="btn" type="submit">Create subject</button>
+  </form>
+</section>
+{% endblock %}

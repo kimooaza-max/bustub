@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}{{ subject.name }} · Teacher{% endblock %}
+{% block content %}
+<section class="panel">
+  <h1>{{ subject.name }}
+    {% if subject.is_language %}<span class="tag">language: {{ subject.language }}</span>{% endif %}
+  </h1>
+  <p><a href="/teacher">← back to dashboard</a></p>
+
+  <!-- Step 2/3: Outcome -->
+  <div class="block">
+    <h2>1 · Learning outcome</h2>
+    <p class="hint">Upload the subject outcome. The AI analyses it and generates aligned questions.</p>
+    <form method="post" action="/teacher/subjects/{{ subject.id }}/outcome" enctype="multipart/form-data">
+      <label>Paste outcome text
+        <textarea name="content" rows="5" placeholder="One outcome / topic per line…"></textarea>
+      </label>
+      <label>…or upload a file (.txt .md .pdf .docx) <input type="file" name="file"></label>
+      <button class="btn" type="submit">Upload outcome & generate questions</button>
+    </form>
+    {% if outcomes %}
+    <ul class="list small">
+      {% for o in outcomes %}<li>Outcome #{{ o.id }} — {{ o.content[:80] }}{% if o.file_path %} 📎{% endif %}</li>{% endfor %}
+    </ul>
+    {% endif %}
+  </div>
+
+  <!-- Step 4/5: Past papers -->
+  <div class="block">
+    <h2>2 · Past papers</h2>
+    <p class="hint">Upload past papers. The AI generates fresh, similar questions within the curriculum.</p>
+    <form method="post" action="/teacher/subjects/{{ subject.id }}/past-paper" enctype="multipart/form-data">
+      <label>Title <input name="title"></label>
+      <label>Paste paper text <textarea name="content" rows="4"></textarea></label>
+      <label>…or upload a file <input type="file" name="file"></label>
+      <button class="btn" type="submit">Upload past paper & generate questions</button>
+    </form>
+    {% if papers %}
+    <ul class="list small">
+      {% for p in papers %}<li>{{ p.title or 'Untitled' }} (#{{ p.id }})</li>{% endfor %}
+    </ul>
+    {% endif %}
+  </div>
+
+  <!-- Generated questions -->
+  <div class="block">
+    <h2>AI-generated questions</h2>
+    {% if questions %}
+    <ol class="list">
+      {% for q in questions %}
+      <li>
+        <span class="tag">{{ q.source.value }}</span>
+        <span class="tag">{{ q.difficulty }}</span>
+        <b>{{ q.prompt }}</b>
+        <div class="muted">Model answer: {{ q.model_answer }}</div>
+      </li>
+      {% endfor %}
+    </ol>
+    {% else %}<p class="hint">No questions yet — upload an outcome or past paper.</p>{% endif %}
+  </div>
+
+  {% if subject.is_language %}
+  <!-- Shadowing -->
+  <div class="block">
+    <h2>3 · Shadowing (mp3)</h2>
+    <form method="post" action="/teacher/subjects/{{ subject.id }}/shadowing" enctype="multipart/form-data">
+      <label>Title <input name="title"></label>
+      <label>Transcript <textarea name="transcript" rows="2"></textarea></label>
+      <label>Audio file (.mp3 .wav .m4a .ogg) <input type="file" name="file" required></label>
+      <button class="btn" type="submit">Upload shadowing clip</button>
+    </form>
+    {% if clips %}
+    <ul class="list small">
+      {% for c in clips %}<li>{{ c.title }} — <a href="/uploads/{{ c.file_path }}">listen</a></li>{% endfor %}
+    </ul>
+    {% endif %}
+  </div>
+
+  <!-- Skills practice -->
+  <div class="block">
+    <h2>4 · Practice material (reading / writing / listening / speaking)</h2>
+    <form method="post" action="/teacher/subjects/{{ subject.id }}/practice" enctype="multipart/form-data">
+      <label>Skill
+        <select name="skill">
+          {% for sk in skills %}<option value="{{ sk }}">{{ sk }}</option>{% endfor %}
+        </select>
+      </label>
+      <label>Title <input name="title"></label>
+      <label>Description <textarea name="description" rows="2"></textarea></label>
+      <label>File <input type="file" name="file"></label>
+      <button class="btn" type="submit">Upload practice material</button>
+    </form>
+    {% if practice %}
+    <ul class="list small">
+      {% for p in practice %}<li><span class="tag">{{ p.skill }}</span> {{ p.title }}</li>{% endfor %}
+    </ul>
+    {% endif %}
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

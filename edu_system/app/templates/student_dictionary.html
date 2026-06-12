@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Personal dictionary{% endblock %}
+{% block content %}
+<section class="panel">
+  <h1>📒 Personal dictionary</h1>
+  <form method="post" action="/student/dictionary">
+    <div class="row">
+      <label>Term <input name="term" required></label>
+      <label>Language <input name="language" placeholder="English / …"></label>
+    </div>
+    <label>Meaning <input name="meaning"></label>
+    <label>Example <input name="example"></label>
+    <label>Notes <textarea name="notes" rows="2"></textarea></label>
+    <button class="btn" type="submit">Add entry</button>
+  </form>
+
+  {% if entries %}
+  <table class="grid">
+    <thead><tr><th>Term</th><th>Meaning</th><th>Example</th><th>Lang</th></tr></thead>
+    <tbody>
+      {% for e in entries %}
+      <tr><td><b>{{ e.term }}</b></td><td>{{ e.meaning }}</td><td class="muted">{{ e.example }}</td><td>{{ e.language }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}<p class="hint">Your dictionary is empty — add your first word above.</p>{% endif %}
+</section>
+{% endblock %}

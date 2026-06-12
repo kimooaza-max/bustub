@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="panel">
+  <h1>Student dashboard</h1>
+  <div class="cards">
+    <a class="card link" href="/student/dictionary"><h2>📒 Personal dictionary</h2><p>Your own vocabulary collection.</p></a>
+    <a class="card link" href="/student/istishhadat"><h2>📖 استشهادات</h2><p>آيات قرآنية وأحاديث نبوية للكتابة.</p></a>
+  </div>
+
+  <h2>Subjects</h2>
+  {% if subjects %}
+  <ul class="list">
+    {% for s in subjects %}
+    <li><a href="/student/subjects/{{ s.id }}">{{ s.name }}</a>
+      {% if s.is_language %}<span class="tag">language</span>{% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="hint">No subjects available yet — your teacher will add them.</p>
+  {% endif %}
+</section>
+{% endblock %}
