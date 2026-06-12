@@ -36,10 +36,13 @@
   pre{white-space:pre-wrap;background:#f8fafc;border:1px solid var(--line);border-radius:8px;padding:.7rem;font-size:.85rem}
   footer{text-align:center;color:var(--muted);font-size:.8rem;padding:1.5rem}
   .row{display:flex;gap:.6rem}.row>*{flex:1}
-  .chips{display:flex;flex-wrap:wrap;gap:.4rem;margin:.3rem 0 .8rem}
-  .chip{background:#f1f5f9;border:1px solid var(--line);border-radius:999px;padding:.35rem .8rem;font:inherit;cursor:pointer;color:var(--ink)}
-  .chip:hover{border-color:var(--brand)}
-  .chip.active{background:var(--brand);color:#fff;border-color:var(--brand)}
+  .tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:.7rem;margin:.4rem 0 1.1rem}
+  @media(min-width:560px){.tiles{grid-template-columns:repeat(3,1fr)}}
+  .tile{border:1px solid var(--line);border-radius:12px;padding:.9rem .7rem;text-align:center;cursor:pointer;background:#fff;font-weight:600;min-height:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.25rem}
+  .tile:hover{border-color:var(--brand);box-shadow:0 1px 6px rgba(37,99,235,.12)}
+  .tile.active{background:var(--brand);color:#fff;border-color:var(--brand)}
+  .tile .lvl{font-size:.68rem;color:var(--muted);font-weight:500}
+  .tile.active .lvl{color:#dbeafe}
 </style>
 </head>
 <body>
@@ -242,22 +245,22 @@ const LANG_SUBJECTS=["English","Arabic"];
 function renderSubjects(){
   let html='';
   for(const lvl in LEVELS){
-    html+=`<h3 class="skill">${lvl}</h3><div class="chips">`+
+    html+=`<h3 class="skill">${lvl}</h3><div class="tiles">`+
       LEVELS[lvl].map(s=>{
         const key=lvl+' · '+s, lang=LANG_SUBJECTS.includes(s)?' 🗣️':'';
-        return `<button class="chip" data-key="${key}" data-name="${s}" onclick="selectSubject(this.dataset.key,this.dataset.name)">${s}${lang}</button>`;
+        return `<div class="tile" data-key="${key}" data-name="${s}" onclick="selectSubject(this.dataset.key,this.dataset.name)"><span>${s}${lang}</span><span class="lvl">${lvl}</span></div>`;
       }).join('')+`</div>`;
   }
   document.getElementById('subjectsByLevel').innerHTML=html;
   const cur=S.get('subjectKey','');
-  if(cur){const el=document.querySelector('.chip[data-key="'+cur+'"]');if(el)selectSubject(cur,el.dataset.name);}
+  if(cur){const el=document.querySelector('.tile[data-key="'+cur+'"]');if(el)selectSubject(cur,el.dataset.name);}
 }
 function selectSubject(key,name){
   S.set('subjectKey',key);S.set('subject',name);
   document.getElementById('currentSubjectBanner').innerHTML='Selected: <b>'+key+'</b>';
   const sp=document.getElementById('fbSubject');if(sp)sp.textContent=' — '+name;
   document.getElementById('langNote').style.display=LANG_SUBJECTS.includes(name)?'block':'none';
-  document.querySelectorAll('.chip').forEach(c=>c.classList.toggle('active',c.dataset.key===key));
+  document.querySelectorAll('.tile').forEach(c=>c.classList.toggle('active',c.dataset.key===key));
 }
 function getFeedback(){
   const t=document.getElementById('work').value.trim();
