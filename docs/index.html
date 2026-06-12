@@ -15,8 +15,10 @@
   main{max-width:820px;margin:1.2rem auto;padding:0 1rem}
   .view{display:none}.view.active{display:block}
   .panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:1.2rem;margin-bottom:1rem}
-  h1{margin:.2rem 0}h2{color:var(--brand2);margin:.2rem 0 .6rem}
-  h3{margin:.2rem 0}
+  h1{margin:.2rem 0}h2{color:var(--brand2);margin:.2rem 0 .6rem}h3{margin:.2rem 0}
+  .block{border-top:1px solid var(--line);margin-top:1.3rem;padding-top:1rem}
+  .block:first-of-type{border-top:0;margin-top:.6rem;padding-top:0}
+  .block.rtl{direction:rtl;text-align:right}
   .tag{background:var(--tag);color:var(--brand2);border-radius:999px;font-size:.72rem;padding:.1rem .55rem;margin-left:.3rem}
   label{display:block;font-size:.9rem;font-weight:600;margin:.5rem 0 .2rem}
   input,textarea,select{width:100%;padding:.5rem .6rem;border:1px solid var(--line);border-radius:8px;font:inherit;background:#fff}
@@ -26,23 +28,24 @@
   .card{border:1px solid var(--line);border-radius:10px;padding:1rem;cursor:pointer;background:#fff}
   .card:hover{border-color:var(--brand)}
   .muted{color:var(--muted);font-size:.9rem}
-  .item{border-top:1px solid var(--line);padding:.6rem 0}
+  .item{border-top:1px solid var(--line);padding:.55rem 0}
   .item:first-child{border-top:0}
   .pill{display:inline-block;background:#f1f5f9;border-radius:6px;padding:.05rem .45rem;font-size:.78rem;margin-right:.3rem}
-  .rtl{direction:rtl;text-align:right}
-  .demoflag{background:#fef9c3;color:#854d0e;border:1px solid #fde68a;border-radius:8px;padding:.5rem .7rem;font-size:.85rem;margin-bottom:1rem}
-  .skill{color:var(--brand2);text-transform:capitalize;margin-top:.6rem}
-  .score{font-weight:700;font-size:1.1rem;color:var(--brand2)}
-  pre{white-space:pre-wrap;background:#f8fafc;border:1px solid var(--line);border-radius:8px;padding:.7rem;font-size:.85rem}
-  footer{text-align:center;color:var(--muted);font-size:.8rem;padding:1.5rem}
-  .row{display:flex;gap:.6rem}.row>*{flex:1}
   .tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:.7rem;margin:.4rem 0 1.1rem}
   @media(min-width:560px){.tiles{grid-template-columns:repeat(3,1fr)}}
   .tile{border:1px solid var(--line);border-radius:12px;padding:.9rem .7rem;text-align:center;cursor:pointer;background:#fff;font-weight:600;min-height:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.25rem}
   .tile:hover{border-color:var(--brand);box-shadow:0 1px 6px rgba(37,99,235,.12)}
-  .tile.active{background:var(--brand);color:#fff;border-color:var(--brand)}
   .tile .lvl{font-size:.68rem;color:var(--muted);font-weight:500}
-  .tile.active .lvl{color:#dbeafe}
+  .upload-card{border:2px dashed var(--brand);border-radius:12px;padding:1.1rem;text-align:center;background:#f8faff;margin:.6rem 0}
+  .plus{width:54px;height:54px;border-radius:12px;border:1px solid var(--line);background:#fff;font-size:1.8rem;color:var(--brand);cursor:pointer;line-height:1}
+  .plus:hover{border-color:var(--brand)}
+  .skill{color:var(--brand2);text-transform:capitalize}
+  .score{font-weight:700;font-size:1.1rem;color:var(--brand2)}
+  .back{display:inline-block;margin-bottom:.4rem;color:var(--brand);text-decoration:none;font-weight:600}
+  pre{white-space:pre-wrap;background:#f8fafc;border:1px solid var(--line);border-radius:8px;padding:.7rem;font-size:.85rem}
+  footer{text-align:center;color:var(--muted);font-size:.8rem;padding:1.5rem}
+  .row{display:flex;gap:.6rem}.row>*{flex:1}
+  .demoflag{background:#fef9c3;color:#854d0e;border:1px solid #fde68a;border-radius:8px;padding:.5rem .7rem;font-size:.85rem;margin-bottom:1rem}
 </style>
 </head>
 <body>
@@ -56,7 +59,7 @@
 </header>
 
 <main>
-  <div class="demoflag">⚠️ This is an interactive <b>concept draft</b>. It runs entirely in your browser (data is saved on this device only). The AI replies are illustrative placeholders — a developer would connect a real AI model.</div>
+  <div class="demoflag">⚠️ This is an interactive <b>concept draft</b>. It runs in your browser (data saved on this device only). AI replies and uploads are illustrative placeholders — a developer would connect a real AI model and real file storage.</div>
 
   <!-- HOME -->
   <section id="home" class="view active">
@@ -64,210 +67,162 @@
       <h1>Educational System</h1>
       <p class="muted">A two-section AI-assisted learning platform. Tap a card to explore.</p>
       <div class="cards">
-        <div class="card" onclick="show('teacher')"><h2>👩‍🏫 Teachers</h2><p>Upload each subject's <b>outcome</b> &amp; <b>past papers</b>; the AI generates aligned questions and can teach the curriculum. Upload shadowing audio &amp; skills practice.</p></div>
-        <div class="card" onclick="show('student')"><h2>🧑‍🎓 Students</h2><p>Personal dictionary, shadowing, reading/writing/listening/speaking practice, Arabic <b>استشهادات</b>, and detailed feedback on any subject.</p></div>
+        <div class="card" onclick="show('teacher')"><h2>👩‍🏫 Teachers</h2><p>Pick a subject and upload its <b>outcome (PDF)</b> &amp; past papers. The AI generates aligned questions.</p></div>
+        <div class="card" onclick="show('student')"><h2>🧑‍🎓 Students</h2><p>Open a subject to get practice, detailed feedback, and — for languages — a personal dictionary, shadowing &amp; <b>استشهادات</b>.</p></div>
       </div>
     </div>
   </section>
 
   <!-- TEACHER -->
   <section id="teacher" class="view">
-    <div class="panel">
-      <h2>👩‍🏫 Teacher — Subject setup</h2>
-      <p class="muted">Step 1 &amp; 2: paste the learning outcome → the AI analyses it and generates aligned questions.</p>
-      <label>Learning outcome (one topic per line)</label>
-      <textarea id="outcome" rows="5" placeholder="e.g.&#10;Cell structure and function&#10;Photosynthesis&#10;Genetics: inheritance basics"></textarea>
-      <button class="btn" onclick="genFromOutcome()">Analyse outcome &amp; generate questions</button>
-
-      <div id="outcomeResult"></div>
+    <div class="panel" id="teacherTiles">
+      <h2>👩‍🏫 Teacher — choose a subject</h2>
+      <p class="muted">Tap a subject to upload its outcome (PDF) and past papers.</p>
+      <div id="teacherSubjects"></div>
     </div>
-
-    <div class="panel">
-      <h2>Past papers</h2>
-      <p class="muted">Step 3 &amp; 4: paste past-paper text → fresh exam-style questions within the curriculum.</p>
-      <label>Past paper text</label>
-      <textarea id="paper" rows="3" placeholder="Paste a few past-paper questions or topics…"></textarea>
-      <button class="btn" onclick="genFromPaper()">Generate exam-style questions</button>
-      <div id="paperResult"></div>
-    </div>
-
-    <div class="panel">
-      <h2>Language material <span class="tag">for students</span></h2>
-      <p class="muted">Teachers upload shadowing audio (mp3) and reading/writing/listening/speaking practice. (Upload is illustrative in this draft.)</p>
-      <div class="row">
-        <div><label>Shadowing clip title</label><input id="shTitle" placeholder="Daily conversation #1"></div>
-        <div><label>Skill</label><select id="prSkill"><option>reading</option><option>writing</option><option>listening</option><option>speaking</option></select></div>
-      </div>
-      <button class="btn" onclick="addMaterial()">Add material</button>
-      <div id="materialList"></div>
-    </div>
+    <div class="panel" id="teacherPanel" style="display:none"></div>
   </section>
 
   <!-- STUDENT -->
   <section id="student" class="view">
-    <div class="panel">
-      <h2>📚 My subjects</h2>
-      <p class="muted">Choose your level, then a subject to work on.</p>
-      <div id="subjectsByLevel"></div>
-      <p id="currentSubjectBanner" class="muted">No subject selected yet.</p>
-      <p id="langNote" class="muted" style="display:none">🗣️ This is a language subject — use your <b>Personal dictionary</b> below, the <b>shadowing &amp; skills practice</b>, and (for Arabic) the <b>الاستشهادات</b> section.</p>
+    <div class="panel" id="studentTiles">
+      <h2>🧑‍🎓 My subjects</h2>
+      <p class="muted">Choose your level, then a subject.</p>
+      <div id="studentSubjects"></div>
     </div>
-
-    <div class="panel">
-      <h2>📒 Personal dictionary</h2>
-      <div class="row">
-        <div><label>Word / term</label><input id="dTerm" placeholder="ubiquitous"></div>
-        <div><label>Language</label><input id="dLang" placeholder="English"></div>
-      </div>
-      <label>Meaning</label><input id="dMean" placeholder="present everywhere">
-      <button class="btn" onclick="addWord()">Add to my dictionary</button>
-      <div id="dictList"></div>
-    </div>
-
-    <div class="panel rtl">
-      <h2>📖 الاستشهادات</h2>
-      <p class="muted">قاموس شخصي للآيات القرآنية والأحاديث النبوية لاستخدامها في الكتابة.</p>
-      <label>النوع</label>
-      <select id="iKind"><option value="ayah">آية قرآنية</option><option value="hadith">حديث نبوي</option></select>
-      <label>النص</label><textarea id="iText" rows="2" placeholder="اكتب النص هنا"></textarea>
-      <label>المرجع</label><input id="iRef" placeholder="السورة/رقم الآية أو الراوي">
-      <button class="btn" onclick="addCite()">إضافة</button>
-      <div id="citeList"></div>
-    </div>
-
-    <div class="panel">
-      <h2>🎧 Shadowing &amp; skills practice</h2>
-      <p class="muted">Students use the material teachers uploaded.</p>
-      <div id="studentMaterial"><p class="muted">No material yet — add some from the Teacher tab.</p></div>
-    </div>
-
-    <div class="panel">
-      <h2>📝 Detailed feedback<span id="fbSubject"></span></h2>
-      <label>Your work</label>
-      <textarea id="work" rows="4" placeholder="Write or paste your answer / essay…"></textarea>
-      <button class="btn" onclick="getFeedback()">Submit &amp; get detailed feedback</button>
-      <div id="fbResult"></div>
-    </div>
+    <div class="panel" id="studentPanel" style="display:none"></div>
   </section>
 </main>
 
 <footer>Interactive concept draft · runs in-browser · source: github.com/kimooaza-max/bustub (edu_system/)</footer>
 
 <script>
-const S = {
-  get(k,d){try{return JSON.parse(localStorage.getItem(k))||d}catch(e){return d}},
-  set(k,v){localStorage.setItem(k,JSON.stringify(v))}
-};
-function show(v){
-  document.querySelectorAll('.view').forEach(e=>e.classList.toggle('active',e.id===v));
-  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===v));
-  if(v==='student') renderStudentMaterial();
-  window.scrollTo(0,0);
-}
-document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>show(b.dataset.view));
+const S={get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}},set(k,v){localStorage.setItem(k,JSON.stringify(v))}};
 
-function topics(text){
-  return text.split('\n').map(s=>s.replace(/^[\s\-*•\d.)]+/,'').trim()).filter(s=>s.length>2);
-}
-function qHTML(list){
-  if(!list.length) return '<p class="muted">Enter some text above first.</p>';
-  return '<h3>AI-generated questions</h3>'+list.map((q,i)=>
-    `<div class="item"><span class="pill">${q.diff}</span><b>${q.prompt}</b><div class="muted">Model answer: ${q.ans}</div></div>`).join('');
-}
-function genFromOutcome(){
-  const t=topics(document.getElementById('outcome').value);
-  const diff=['easy','medium','hard'];
-  const qs=(t.length?t:['General concepts']).slice(0,6).map((tp,i)=>({diff:diff[i%3],
-    prompt:`Explain and give an example of: ${tp}`,
-    ans:`A full answer covers ${tp} with a definition, an example, and a common misconception.`}));
-  document.getElementById('outcomeResult').innerHTML=qHTML(qs);
-}
-function genFromPaper(){
-  const t=topics(document.getElementById('paper').value);
-  const qs=(t.length?t:['Course topic']).slice(0,5).map(tp=>({diff:'medium',
-    prompt:`(exam-style) Question on: ${tp}`,ans:`Worked solution for ${tp}.`}));
-  document.getElementById('paperResult').innerHTML=qHTML(qs);
-}
-function addMaterial(){
-  const m=S.get('material',[]);
-  const title=document.getElementById('shTitle').value.trim();
-  const skill=document.getElementById('prSkill').value;
-  if(title) m.push({type:'shadowing',title});
-  m.push({type:'practice',skill,title:title||(skill+' practice')});
-  S.set('material',m);document.getElementById('shTitle').value='';renderMaterial();
-}
-function renderMaterial(){
-  const m=S.get('material',[]);
-  document.getElementById('materialList').innerHTML = m.length?
-    '<h3>Added material</h3>'+m.map(x=>`<div class="item"><span class="pill">${x.type==='shadowing'?'🎧 shadowing':x.skill}</span>${x.title}</div>`).join('')
-    :'';
-}
-function renderStudentMaterial(){
-  const m=S.get('material',[]);
-  const sk=['reading','writing','listening','speaking'];
-  let html='';
-  const sh=m.filter(x=>x.type==='shadowing');
-  html+='<h3 class="skill">🎧 shadowing</h3>'+(sh.length?sh.map(x=>`<div class="item">${x.title} <span class="muted">(audio clip)</span></div>`).join(''):'<p class="muted">none yet</p>');
-  sk.forEach(s=>{const items=m.filter(x=>x.type==='practice'&&x.skill===s);
-    html+=`<h3 class="skill">${s}</h3>`+(items.length?items.map(x=>`<div class="item">${x.title}</div>`).join(''):'<p class="muted">none yet</p>');});
-  document.getElementById('studentMaterial').innerHTML=html;
-}
-function addWord(){
-  const d=S.get('dict',[]);const term=document.getElementById('dTerm').value.trim();
-  if(!term)return;
-  d.unshift({term,lang:document.getElementById('dLang').value,mean:document.getElementById('dMean').value});
-  S.set('dict',d);['dTerm','dLang','dMean'].forEach(i=>document.getElementById(i).value='');renderDict();
-}
-function renderDict(){
-  const d=S.get('dict',[]);
-  document.getElementById('dictList').innerHTML=d.length?d.map(w=>
-    `<div class="item"><b>${w.term}</b> <span class="pill">${w.lang||'—'}</span><div class="muted">${w.mean||''}</div></div>`).join('')
-    :'<p class="muted">Your dictionary is empty.</p>';
-}
-function addCite(){
-  const c=S.get('cite',[]);const text=document.getElementById('iText').value.trim();
-  if(!text)return;
-  c.unshift({kind:document.getElementById('iKind').value,text,ref:document.getElementById('iRef').value});
-  S.set('cite',c);['iText','iRef'].forEach(i=>document.getElementById(i).value='');renderCite();
-}
-function renderCite(){
-  const c=S.get('cite',[]);
-  document.getElementById('citeList').innerHTML=c.length?c.map(x=>
-    `<div class="item"><span class="pill">${x.kind==='ayah'?'آية':'حديث'}</span><b>${x.text}</b><div class="muted">${x.ref||''}</div></div>`).join('')
-    :'<p class="muted">لا توجد استشهادات بعد.</p>';
-}
 const LEVELS={
   "Level 1":["English","Chemistry","ICT","Global (Past Papers)","Math","Arabic","Physics","Art","Geography"],
   "Level 2":["Project Management","Math","Biology","Physics","English"],
   "Level 3":["Math","Chemistry","Physics","Biology"]
 };
 const LANG_SUBJECTS=["English","Arabic"];
-function renderSubjects(){
+
+/* ---------- top-level navigation ---------- */
+function show(v){
+  document.querySelectorAll('.view').forEach(e=>e.classList.toggle('active',e.id===v));
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===v));
+  backTeacher();backStudent();
+  window.scrollTo(0,0);
+}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>show(b.dataset.view));
+
+/* ---------- subject tiles ---------- */
+function renderTiles(containerId,handler){
   let html='';
   for(const lvl in LEVELS){
     html+=`<h3 class="skill">${lvl}</h3><div class="tiles">`+
-      LEVELS[lvl].map(s=>{
-        const key=lvl+' · '+s, lang=LANG_SUBJECTS.includes(s)?' 🗣️':'';
-        return `<div class="tile" data-key="${key}" data-name="${s}" onclick="selectSubject(this.dataset.key,this.dataset.name)"><span>${s}${lang}</span><span class="lvl">${lvl}</span></div>`;
-      }).join('')+`</div>`;
+      LEVELS[lvl].map(s=>{const lang=LANG_SUBJECTS.includes(s)?' 🗣️':'';
+        return `<div class="tile" onclick="${handler}('${lvl}','${s}')"><span>${s}${lang}</span><span class="lvl">${lvl}</span></div>`;}).join('')+
+      `</div>`;
   }
-  document.getElementById('subjectsByLevel').innerHTML=html;
-  const cur=S.get('subjectKey','');
-  if(cur){const el=document.querySelector('.tile[data-key="'+cur+'"]');if(el)selectSubject(cur,el.dataset.name);}
+  document.getElementById(containerId).innerHTML=html;
 }
-function selectSubject(key,name){
-  S.set('subjectKey',key);S.set('subject',name);
-  document.getElementById('currentSubjectBanner').innerHTML='Selected: <b>'+key+'</b>';
-  const sp=document.getElementById('fbSubject');if(sp)sp.textContent=' — '+name;
-  document.getElementById('langNote').style.display=LANG_SUBJECTS.includes(name)?'block':'none';
-  document.querySelectorAll('.tile').forEach(c=>c.classList.toggle('active',c.dataset.key===key));
+
+/* ---------- TEACHER: subject page ---------- */
+function openTeacherSubject(lvl,name){
+  window.tKey=lvl+' · '+name; window.tName=name;
+  const isLang=LANG_SUBJECTS.includes(name);
+  let h=`<a class="back" href="#" onclick="backTeacher();return false">← Back to subjects</a>`;
+  h+=`<h1>${name} <span class="tag">${lvl}</span></h1>`;
+  h+=`<div class="block"><h2>Outcomes (for this subject)</h2>
+    <div class="upload-card">
+      <input type="file" id="outFile" accept="application/pdf" style="display:none" onchange="uploadOutcome()">
+      <button class="plus" onclick="document.getElementById('outFile').click()">+</button>
+      <div class="muted">Upload the outcome: PDF</div>
+    </div>
+    <div id="outList"></div>
+    <button class="btn" onclick="genQ()">Analyse outcome &amp; generate questions</button>
+    <div id="qResult"></div></div>`;
+  h+=`<div class="block"><h2>Past papers</h2>
+    <div class="upload-card">
+      <input type="file" id="ppFile" style="display:none" onchange="uploadPaper()">
+      <button class="plus" onclick="document.getElementById('ppFile').click()">+</button>
+      <div class="muted">Upload past paper</div>
+    </div>
+    <div id="ppList"></div></div>`;
+  if(isLang){h+=`<div class="block"><h2>Language material <span class="tag">for students</span></h2>
+    <p class="muted">Upload shadowing audio (mp3) and reading / writing / listening / speaking practice. (Illustrative in this draft.)</p></div>`;}
+  document.getElementById('teacherPanel').innerHTML=h;
+  document.getElementById('teacherTiles').style.display='none';
+  document.getElementById('teacherPanel').style.display='block';
+  renderOutcomes();renderPapers();window.scrollTo(0,0);
 }
+function backTeacher(){const t=document.getElementById('teacherTiles'),p=document.getElementById('teacherPanel');if(t)t.style.display='block';if(p)p.style.display='none';}
+function uploadOutcome(){const f=document.getElementById('outFile').files[0];if(!f)return;const o=S.get('out:'+tKey,[]);o.push(f.name);S.set('out:'+tKey,o);renderOutcomes();}
+function renderOutcomes(){const o=S.get('out:'+tKey,[]);document.getElementById('outList').innerHTML=o.length?o.map(n=>`<div class="item">✅ ${n}</div>`).join(''):'<p class="muted">No outcome uploaded yet.</p>';}
+function uploadPaper(){const f=document.getElementById('ppFile').files[0];if(!f)return;const o=S.get('pp:'+tKey,[]);o.push(f.name);S.set('pp:'+tKey,o);renderPapers();}
+function renderPapers(){const o=S.get('pp:'+tKey,[]);document.getElementById('ppList').innerHTML=o.length?o.map(n=>`<div class="item">✅ ${n}</div>`).join(''):'<p class="muted">No past paper uploaded yet.</p>';}
+function genQ(){
+  if(!S.get('out:'+tKey,[]).length){document.getElementById('qResult').innerHTML='<p class="muted">Upload an outcome first.</p>';return;}
+  const diff=['easy','medium','hard'];let html='<h3>AI-generated questions</h3>';
+  for(let i=0;i<5;i++){html+=`<div class="item"><span class="pill">${diff[i%3]}</span><b>[stub] ${tName}: question ${i+1} aligned to the uploaded outcome</b><div class="muted">Model answer: a complete response would cover the outcome point with an example.</div></div>`;}
+  document.getElementById('qResult').innerHTML=html;
+}
+
+/* ---------- STUDENT: subject page ---------- */
+function openStudentSubject(lvl,name){
+  window.sName=name;
+  const isLang=LANG_SUBJECTS.includes(name);
+  let h=`<a class="back" href="#" onclick="backStudent();return false">← Back to subjects</a>`;
+  h+=`<h1>${name} <span class="tag">${lvl}</span></h1>`;
+  h+=`<div class="block"><h2>📚 Practice material</h2><p class="muted">Material your teacher uploads for ${name} will appear here.</p></div>`;
+  if(isLang){
+    h+=`<div class="block"><h2>🎧 Shadowing &amp; skills practice</h2>`+
+       ['shadowing','reading','writing','listening','speaking'].map(s=>`<h3 class="skill">${s}</h3><p class="muted">${s==='shadowing'?'🔊 Audio clips (mp3) for shadowing':'Practice'} uploaded by the teacher will appear here.</p>`).join('')+`</div>`;
+    h+=`<div class="block"><h2>📒 Personal dictionary</h2>
+      <div class="row"><div><label>Word / term</label><input id="dTerm"></div><div><label>Language</label><input id="dLang" value="${name}"></div></div>
+      <label>Meaning</label><input id="dMean">
+      <button class="btn" onclick="addWord()">Add to my dictionary</button>
+      <div id="dictList"></div></div>`;
+    if(name==='Arabic'){
+      h+=`<div class="block rtl"><h2>📖 الاستشهادات</h2>
+        <p class="muted">قاموس شخصي للآيات القرآنية والأحاديث النبوية لاستخدامها في الكتابة.</p>
+        <label>النوع</label><select id="iKind"><option value="ayah">آية قرآنية</option><option value="hadith">حديث نبوي</option></select>
+        <label>النص</label><textarea id="iText" rows="2"></textarea>
+        <label>المرجع</label><input id="iRef">
+        <button class="btn" onclick="addCite()">إضافة</button>
+        <div id="citeList"></div></div>`;
+    }
+  }
+  h+=`<div class="block"><h2>📝 Detailed feedback — ${name}</h2>
+    <label>Your work</label><textarea id="work" rows="4" placeholder="Write or paste your answer / essay…"></textarea>
+    <button class="btn" onclick="getFeedback()">Submit &amp; get detailed feedback</button>
+    <div id="fbResult"></div></div>`;
+  document.getElementById('studentPanel').innerHTML=h;
+  document.getElementById('studentTiles').style.display='none';
+  document.getElementById('studentPanel').style.display='block';
+  renderDict();if(name==='Arabic')renderCite();window.scrollTo(0,0);
+}
+function backStudent(){const t=document.getElementById('studentTiles'),p=document.getElementById('studentPanel');if(t)t.style.display='block';if(p)p.style.display='none';}
+
+/* ---------- personal dictionary ---------- */
+function addWord(){const d=S.get('dict',[]);const term=document.getElementById('dTerm').value.trim();if(!term)return;
+  d.unshift({term,lang:document.getElementById('dLang').value,mean:document.getElementById('dMean').value});
+  S.set('dict',d);document.getElementById('dTerm').value='';document.getElementById('dMean').value='';renderDict();}
+function renderDict(){const el=document.getElementById('dictList');if(!el)return;const d=S.get('dict',[]);
+  el.innerHTML=d.length?d.map(w=>`<div class="item"><b>${w.term}</b> <span class="pill">${w.lang||'—'}</span><div class="muted">${w.mean||''}</div></div>`).join(''):'<p class="muted">Your dictionary is empty.</p>';}
+
+/* ---------- استشهادات ---------- */
+function addCite(){const c=S.get('cite',[]);const text=document.getElementById('iText').value.trim();if(!text)return;
+  c.unshift({kind:document.getElementById('iKind').value,text,ref:document.getElementById('iRef').value});
+  S.set('cite',c);document.getElementById('iText').value='';document.getElementById('iRef').value='';renderCite();}
+function renderCite(){const el=document.getElementById('citeList');if(!el)return;const c=S.get('cite',[]);
+  el.innerHTML=c.length?c.map(x=>`<div class="item"><span class="pill">${x.kind==='ayah'?'آية':'حديث'}</span><b>${x.text}</b><div class="muted">${x.ref||''}</div></div>`).join(''):'<p class="muted">لا توجد استشهادات بعد.</p>';}
+
+/* ---------- detailed feedback ---------- */
 function getFeedback(){
-  const t=document.getElementById('work').value.trim();
-  const words=t?t.split(/\s+/).length:0;
+  const t=document.getElementById('work').value.trim();const words=t?t.split(/\s+/).length:0;
   const score=Math.max(0,Math.min(100,Math.round(40+Math.min(words,300)/6)));
-  const subj=S.get('subject','(no subject selected)');
-  const out=`Subject: ${subj} — Detailed feedback (criterion by criterion):
+  const out=`Subject: ${window.sName||'(subject)'} — detailed feedback (criterion by criterion):
 
 • Content & accuracy: addresses the task; support claims with examples.
 • Structure & coherence: logical flow with clear paragraphing.
@@ -276,10 +231,12 @@ function getFeedback(){
 
 Length: ~${words} words.
 Next steps: revise the weakest criterion above and resubmit.`;
-  document.getElementById('fbResult').innerHTML=
-    `<p class="score">Score: ${score}/100</p><pre>${out}</pre>`;
+  document.getElementById('fbResult').innerHTML=`<p class="score">Score: ${score}/100</p><pre>${out}</pre>`;
 }
-renderMaterial();renderDict();renderCite();renderSubjects();
+
+/* ---------- init ---------- */
+renderTiles('teacherSubjects','openTeacherSubject');
+renderTiles('studentSubjects','openStudentSubject');
 </script>
 </body>
 </html>
