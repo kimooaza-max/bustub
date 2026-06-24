@@ -240,8 +240,9 @@
 </div>
 <div class="toast" id="toast"></div>
 
-<!-- محرك الذكاء الخاص بالموقع (نفس الملف بيستخدمه السيرفر) -->
+<!-- محرك الذكاء + منطق المحفظة (نفس الملفات بيستخدمها السيرفر) -->
 <script src="engine.js"></script>
+<script src="wallet.js"></script>
 <script>
 /* ============================================================
    State
@@ -281,25 +282,12 @@ function saveState(){ try { localStorage.setItem(STORE_KEY, JSON.stringify(state
 
 const state = loadState();
 
-/* ---------- معاملات مالية مركزية ---------- */
-function logTx(type, label, amount){
-  state.ledger.unshift({ t: Date.now(), type, label, amount, balance: +state.balance.toFixed(2) });
-  if (state.ledger.length > 100) state.ledger.length = 100;
-}
+/* ---------- معاملات مالية: نفس wallet.js اللي بيستخدمه السيرفر ----------
+   الواجهة بقت غلاف رفيع فوق ZakaWallet — مصدر واحد للحقيقة، نفس قواعد
+   الخصم في المتصفح والسيرفر. logTx/charge/recordAd كلها جوّه wallet.js. */
 function commit(){ saveState(); render(); }
-function charge(amount, label){            // خصم من المستخدم = دخل للموقع
-  state.balance -= amount;
-  state.stats.revenue += amount;
-  logTx('charge', label, -amount);
-  commit();
-}
-function recordAd(){
-  state.stats.adImpressions++;
-  state.stats.adRevenue += AD_REVENUE;
-  state.stats.revenue   += AD_REVENUE;
-  logTx('ad', 'ظهور إعلان (نسخة مجانية)', AD_REVENUE);
-  commit();
-}
+function charge(amount, label){ ZakaWallet.charge(state, amount, label); commit(); } // ممكن يرمي INSUFFICIENT_FUNDS
+function recordAd(){ ZakaWallet.recordAd(state); commit(); }
 
 /* ============================================================
    المحرك بييجي من engine.js (ZakaAI) — نفسه اللي بيستخدمه السيرفر.
@@ -362,15 +350,26 @@ function send(){
 let pendingQuestion = null;
 function doAnswer(q){
   addMsg(esc(q),'user');
-  const res = AI.ask(q, state.tier, {domains:unlockedDomains()});
+
+  // نفس منطق السيرفر: ZakaWallet.ask بيطبّق المجالات + الطبقات + الخصم
+  let res;
+  try { res = ZakaWallet.ask(state, q, state.tier); }
+  catch(e){
+    if(e && e.code==='INSUFFICIENT_FUNDS'){
+      const cost = PRICE[state.tier];
+      addMsg(`محتاج <b>$${cost.toFixed(2)}</b> للإجابة بمستوى «${tierName(state.tier)}» ورصيدك مش كفاية.`,'bot',
+        {tag:'⚠️', upsellHtml:`<button class="btn gold" onclick="openStore()">＋ اشحن رصيد</button>`});
+      return;
+    }
+    throw e;
+  }
+  commit(); // حفظ الخصم/الإحصائيات + إعادة الرسم
 
   // مجال مفتوح → رد بمستوى «مدرّس» مجاناً
-  if(res.tier==='domain'){
-    addMsg(res.html,'bot',{tag:res.tag});
-    state.stats.questions++; commit();
-    return;
-  }
-  if(state.tier==='free'){
+  if(res.tier==='domain'){ addMsg(res.html,'bot',{tag:res.tag}); return; }
+
+  // النسخة المجانية → رد غبي + زر ترقية
+  if(res.tier==='free'){
     addMsg(res.html,'bot',{
       dumb:true, tag:'🥔 النسخة المجانية (غالباً غلط)',
       upsellHtml:`<button class="btn primary" onclick="upgradeAnswer('${encodeURIComponent(q)}')">
@@ -378,15 +377,9 @@ function doAnswer(q){
     });
     return;
   }
-  const cost = PRICE[state.tier];
-  if(state.balance < cost){
-    addMsg(`محتاج <b>$${cost.toFixed(2)}</b> للإجابة بمستوى «${tierName(state.tier)}» ورصيدك مش كفاية.`,'bot',
-      {tag:'⚠️', upsellHtml:`<button class="btn gold" onclick="openStore()">＋ اشحن رصيد</button>`});
-    return;
-  }
-  charge(cost, `سؤال ${tierName(state.tier)}`);
-  state.stats.questions++;
-  addMsg(res.html,'bot',{tag:`${state.tier==='genius'?'💎 عبقري':'🧠 ذكي'} · خُصم $${cost.toFixed(2)}`});
+
+  // ذكي/عبقري → اتخصم جوّه ZakaWallet.ask
+  addMsg(res.html,'bot',{tag:`${state.tier==='genius'?'💎 عبقري':'🧠 ذكي'} · خُصم $${res.cost.toFixed(2)}`});
 }
 
 function upgradeAnswer(encQ){
@@ -463,7 +456,7 @@ function openStore(){
     </div>`;
   document.getElementById('overlay').classList.add('show');
 }
-function topup(d,dia){ state.balance+=d; state.diamonds+=dia; logTx('topup',`شحن محفظة (+${dia}💎)`,d); commit(); closeOverlay(); toast(`تم إضافة $${d.toFixed(2)} و ${dia}💎`); }
+function topup(d,dia){ ZakaWallet.topup(state,d,dia); commit(); closeOverlay(); toast(`تم إضافة $${d.toFixed(2)} و ${dia}💎`); }
 function closeOverlay(){ document.getElementById('overlay').classList.remove('show'); }
 document.getElementById('overlay').addEventListener('click',e=>{ if(e.target.id==='overlay') closeOverlay(); });
 
@@ -473,8 +466,7 @@ document.getElementById('overlay').addEventListener('click',e=>{ if(e.target.id=
 function subscribeVideo(){
   if(state.videoSub){ toast('انت مشترك بالفعل ✓'); return; }
   if(state.balance < PRICE.videoSub){ toast('رصيدك مش كفاية لاشتراك الفيديو'); openStore(); return; }
-  state.videoSub=true; state.videoSecondsLeft=VIDEO_DAILY_SECONDS; state.lastDay=today();
-  charge(PRICE.videoSub, 'اشتراك استوديو الفيديو (شهري)');
+  ZakaWallet.subscribeVideo(state); commit();
   closeOverlay(); toast('🎬 اتفعّل اشتراك الفيديو! 5 دقائق يومياً');
 }
 function renderVideo(){
@@ -579,8 +571,7 @@ function unlockDomain(id){
   const d=(AI.DOMAINS||[]).find(x=>x.id===id); if(!d) return;
   if(state.domains[id]){ toast('المجال ده مفتوح بالفعل ✓'); return; }
   if(state.balance < d.price){ toast('رصيدك مش كفاية — اشحن الأول'); openStore(); return; }
-  state.domains[id]=true;
-  charge(d.price, `حزمة ذكاء: ${d.name}`);
+  ZakaWallet.unlockDomain(state, id); commit();
   toast(`📚 اتفتحت حزمة ${d.name}! كل أسئلتها بقت ذكية ومجانية`);
 }
 
