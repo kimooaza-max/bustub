@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ذكا — DumbAI ◦ النسخة الفري غبية بقصد</title>
+<style>
+  :root{
+    --bg:#0b1020; --panel:#121a33; --panel2:#1a2547; --line:#27345e;
+    --text:#eaf0ff; --muted:#9fb0d8; --accent:#6c8cff; --accent2:#9b6cff;
+    --good:#37d399; --warn:#ffcc66; --bad:#ff6b8a; --gold:#ffd56b;
+    --radius:16px; --shadow:0 10px 40px rgba(0,0,0,.45);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"Segoe UI",Tahoma,system-ui,sans-serif;background:
+    radial-gradient(1200px 700px at 80% -10%,#1b2a5540,transparent),
+    radial-gradient(1000px 600px at -10% 10%,#241a4d40,transparent),var(--bg);
+    color:var(--text);min-height:100vh}
+  .wrap{max-width:1080px;margin:0 auto;padding:18px 16px 60px}
+
+  /* ---------- Header / wallet ---------- */
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px;
+    flex-wrap:wrap;margin-bottom:14px}
+  .brand{display:flex;align-items:center;gap:10px}
+  .logo{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));font-size:22px;
+    box-shadow:0 6px 20px #6c8cff55}
+  .brand h1{font-size:20px;margin:0;line-height:1}
+  .brand small{color:var(--muted);font-size:12px}
+  .wallet{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .chip{background:var(--panel);border:1px solid var(--line);padding:7px 11px;
+    border-radius:999px;font-size:13px;display:flex;gap:6px;align-items:center}
+  .chip b{color:var(--gold)}
+  .btn{cursor:pointer;border:1px solid var(--line);background:var(--panel2);
+    color:var(--text);padding:8px 13px;border-radius:10px;font-size:13px;
+    transition:.15s;font-family:inherit}
+  .btn:hover{border-color:var(--accent);transform:translateY(-1px)}
+  .btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));
+    border:none;font-weight:600}
+  .btn.gold{background:linear-gradient(135deg,#ffce5a,#ff9d3c);color:#311;border:none;font-weight:700}
+
+  /* ---------- Tier selector ---------- */
+  .tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+  .tier{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    padding:12px;cursor:pointer;transition:.15s;position:relative;overflow:hidden}
+  .tier:hover{transform:translateY(-2px);border-color:var(--accent)}
+  .tier.active{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent) inset}
+  .tier .top{display:flex;justify-content:space-between;align-items:center}
+  .tier .emo{font-size:26px}
+  .tier h3{margin:6px 0 2px;font-size:16px}
+  .tier .price{color:var(--gold);font-weight:700;font-size:14px}
+  .tier p{color:var(--muted);font-size:12px;margin:6px 0 0;line-height:1.5}
+  .tier .badge{position:absolute;top:10px;left:10px;font-size:10px;background:var(--bad);
+    padding:2px 8px;border-radius:999px;color:#fff}
+  .tier.smart .badge{background:var(--good)}
+  .tier.genius .badge{background:var(--accent2)}
+
+  /* ---------- Chat ---------- */
+  .grid{display:grid;grid-template-columns:1fr;gap:14px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow)}
+  .card .hd{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;
+    justify-content:space-between;align-items:center}
+  .card .hd h2{font-size:15px;margin:0}
+  .chat{height:380px;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+  .msg{max-width:80%;padding:10px 13px;border-radius:14px;font-size:14px;line-height:1.6;
+    animation:pop .18s ease}
+  @keyframes pop{from{opacity:0;transform:translateY(6px)}}
+  .msg.user{align-self:flex-start;background:linear-gradient(135deg,var(--accent),var(--accent2));
+    border-bottom-right-radius:4px}
+  .msg.bot{align-self:flex-end;background:var(--panel2);border:1px solid var(--line);
+    border-bottom-left-radius:4px}
+  .msg.bot.dumb{border-color:#5a2740;background:#2a1626}
+  .msg .tag{font-size:10px;opacity:.7;display:block;margin-bottom:3px}
+  .upsell{margin-top:8px;display:flex;gap:6px;flex-wrap:wrap}
+  .upsell .btn{padding:5px 10px;font-size:12px}
+  .composer{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line)}
+  .composer input{flex:1;background:var(--bg);border:1px solid var(--line);color:var(--text);
+    padding:11px 13px;border-radius:10px;font-size:14px;font-family:inherit}
+  .composer input:focus{outline:none;border-color:var(--accent)}
+  .hint{font-size:11px;color:var(--muted);padding:0 14px 12px}
+
+  /* ---------- Video studio ---------- */
+  .video-lock{padding:24px;text-align:center}
+  .video-lock .big{font-size:40px}
+  .vstudio{padding:16px}
+  .vrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+  .vrow label{font-size:13px;color:var(--muted)}
+  .vrow input[type=range]{flex:1;accent-color:var(--accent)}
+  .meter{height:8px;background:var(--bg);border-radius:99px;overflow:hidden;border:1px solid var(--line)}
+  .meter>i{display:block;height:100%;background:linear-gradient(90deg,var(--good),var(--accent));width:100%}
+  .vresult{margin-top:14px;border:1px solid var(--line);border-radius:12px;overflow:hidden;display:none}
+  .vplayer{height:180px;background:linear-gradient(135deg,#1a2547,#0b1020);display:grid;
+    place-items:center;position:relative}
+  .vplayer .play{width:60px;height:60px;border-radius:50%;background:#ffffff22;display:grid;
+    place-items:center;font-size:26px;backdrop-filter:blur(4px)}
+  .vplayer .dur{position:absolute;bottom:8px;left:8px;background:#000a;padding:3px 8px;
+    border-radius:6px;font-size:12px}
+
+  /* ---------- Ad modal ---------- */
+  .overlay{position:fixed;inset:0;background:#000b;display:none;place-items:center;z-index:50;padding:16px}
+  .overlay.show{display:grid}
+  .modal{background:var(--panel);border:1px solid var(--line);border-radius:18px;
+    max-width:420px;width:100%;padding:20px;box-shadow:var(--shadow);animation:pop .2s}
+  .modal h3{margin:0 0 4px}
+  .ad-box{margin:14px 0;border-radius:12px;height:170px;display:grid;place-items:center;
+    text-align:center;background:linear-gradient(135deg,#ff9d3c,#ff5a8a);color:#fff;
+    font-weight:700;position:relative;overflow:hidden}
+  .ad-box small{font-weight:400;display:block;opacity:.9;margin-top:4px}
+  .ad-box .skip{position:absolute;top:8px;left:8px;background:#000a;padding:4px 10px;
+    border-radius:8px;font-size:12px}
+  .store-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+  .store-item{border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center;cursor:pointer;transition:.15s}
+  .store-item:hover{border-color:var(--accent);transform:translateY(-2px)}
+  .store-item .em{font-size:26px}
+  .store-item .p{color:var(--gold);font-weight:700;margin-top:4px}
+  /* ---------- Domain packs ---------- */
+  .packs{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:16px}
+  .pack{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:14px 10px;text-align:center}
+  .pack.owned{border-color:var(--good);box-shadow:0 0 0 1px var(--good) inset}
+  .pack .pe{font-size:28px}
+  .pack .pn{font-size:13px;margin:6px 0 8px}
+  .pack .pok{color:var(--good);font-size:13px;font-weight:700}
+  .pack .btn{padding:6px 10px;font-size:12px}
+  @media(max-width:640px){.packs{grid-template-columns:repeat(2,1fr)}}
+
+  /* ---------- Earnings dashboard ---------- */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:16px}
+  .stat{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center}
+  .stat .v{font-size:20px;font-weight:700}
+  .stat .l{font-size:11px;color:var(--muted);margin-top:4px}
+  .txlist{padding:0 16px 16px;display:flex;flex-direction:column;gap:6px}
+  .txrow{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13px;
+    background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:8px 11px}
+  .txrow .txt{color:var(--muted);font-size:11px;min-width:42px;text-align:left}
+  @media(max-width:640px){.stats{grid-template-columns:repeat(2,1fr)}}
+  .x{cursor:pointer;color:var(--muted);font-size:20px;float:left}
+  .toast{position:fixed;bottom:20px;right:20px;background:var(--panel2);border:1px solid var(--line);
+    padding:12px 16px;border-radius:12px;z-index:80;box-shadow:var(--shadow);display:none;font-size:14px}
+  .toast.show{display:block;animation:pop .2s}
+  @media(max-width:640px){.tiers{grid-template-columns:1fr}.msg{max-width:92%}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="brand">
+      <div class="logo">🥔</div>
+      <div>
+        <h1>ذكا · DumbAI</h1>
+        <small>الذكاء بفلوس — والنسخة المجانية غبية بقصد 😈</small>
+      </div>
+    </div>
+    <div class="wallet">
+      <span class="chip">💵 رصيد: <b id="balance">$2.00</b></span>
+      <span class="chip">💎 ماس: <b id="diamonds">50</b></span>
+      <button class="btn gold" onclick="openStore()">＋ اشحن</button>
+    </div>
+  </header>
+
+  <!-- Intelligence tiers -->
+  <div class="tiers" id="tiers">
+    <div class="tier free active" data-tier="free" onclick="selectTier('free')">
+      <span class="badge">غبي</span>
+      <div class="top"><span class="emo">🥔</span></div>
+      <h3>مجاني — Potato</h3>
+      <div class="price">$0.00 · مع إعلان</div>
+      <p>بيرد على أي سؤال <b>غلط بثقة</b>. تسأله 1+1 يقول 11. إعلان قبل كل شات جديد.</p>
+    </div>
+    <div class="tier smart" data-tier="smart" onclick="selectTier('smart')">
+      <span class="badge">ذكي</span>
+      <div class="top"><span class="emo">🧠</span></div>
+      <h3>ذكي — Smart</h3>
+      <div class="price">$0.10 / سؤال</div>
+      <p>إجابات <b>صح ومختصرة</b>. من غير إعلانات. بيتخصم من الرصيد مع كل سؤال.</p>
+    </div>
+    <div class="tier genius" data-tier="genius" onclick="selectTier('genius')">
+      <span class="badge">عبقري</span>
+      <div class="top"><span class="emo">💎</span></div>
+      <h3>عبقري — Genius</h3>
+      <div class="price">$0.30 / سؤال</div>
+      <p>إجابة صح <b>+ شرح وخطوات</b> للمادة أو أي موضوع. أعلى مستوى ذكاء.</p>
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- Chat card -->
+    <div class="card">
+      <div class="hd">
+        <h2>💬 الشات</h2>
+        <button class="btn" onclick="newChat()">＋ شات جديد</button>
+      </div>
+      <div class="chat" id="chat"></div>
+      <div class="composer">
+        <input id="input" placeholder="اكتب سؤالك… (جرّب: 1+1 ، عاصمة مصر ، 12*3)"
+          onkeydown="if(event.key==='Enter')send()" />
+        <button class="btn primary" onclick="send()">إرسال</button>
+      </div>
+      <div class="hint" id="modeHint"></div>
+    </div>
+
+    <!-- Domain intelligence packs -->
+    <div class="card">
+      <div class="hd">
+        <h2>📚 حزم الذكاء حسب المجال</h2>
+        <span class="chip">افتح المجال = ذكاء مجاني فيه للأبد</span>
+      </div>
+      <div id="domains"></div>
+    </div>
+
+    <!-- Video studio card -->
+    <div class="card">
+      <div class="hd">
+        <h2>🎬 استوديو الفيديو</h2>
+        <span class="chip" id="videoStateChip">🔒 غير مشترك</span>
+      </div>
+      <div id="videoBody"></div>
+    </div>
+
+    <!-- Earnings / revenue dashboard -->
+    <div class="card">
+      <div class="hd">
+        <h2>📊 لوحة الأرباح (منظور الموقع)</h2>
+        <button class="btn" onclick="resetAll()">↺ تصفير</button>
+      </div>
+      <div id="earnings"></div>
+    </div>
+  </div>
+
+  <p style="text-align:center;color:var(--muted);font-size:12px;margin-top:22px">
+    نموذج أولي للفكرة — كل المنطق شغّال في المتصفح بدون سيرفر. الأرقام والاقتصاديات في
+    <code>README.md</code>.
+  </p>
+</div>
+
+<!-- Overlay (ad + store share it) -->
+<div class="overlay" id="overlay">
+  <div class="modal" id="modal"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<!-- محرك الذكاء + منطق المحفظة (نفس الملفات بيستخدمها السيرفر) -->
+<script>
+/* ============================================================
+   ZakaAI — محرك الذكاء الخاص بالموقع (مش كلود ولا API خارجي)
+   ------------------------------------------------------------
+   ده "العقل" بتاع التطبيق: منطق مستقل بالكامل بيعيش جوه الكود.
+   بيشتغل في المتصفح (standalone) وفي السيرفر (Node) بنفس الملف.
+
+   الفكرة: نفس السؤال بيدّي رد مختلف حسب الطبقة:
+     - free   → إجابة غلط بقصد (1+1 = 11)
+     - smart  → إجابة صح ومختصرة
+     - genius → إجابة صح + شرح وخطوات
+
+   لما يتوفر سيرفر/موديل أقوى بعدين، نوسّع smartAnswer/geniusAnswer
+   من غير ما نلمس أي حاجة في الواجهة.
+============================================================ */
+(function (root) {
+  'use strict';
+
+  /* ---------- أدوات مساعدة ---------- */
+  function parseMath(q) {
+    const m = q.replace(/×/g, '*').replace(/x/gi, '*')
+      .match(/(-?\d+(?:\.\d+)?)\s*([+\-*\/])\s*(-?\d+(?:\.\d+)?)/);
+    if (!m) return null;
+    return { a: parseFloat(m[1]), op: m[2], b: parseFloat(m[3]), raw: `${m[1]} ${m[2]} ${m[3]}` };
+  }
+  function calc({ a, op, b }) {
+    switch (op) {
+      case '+': return a + b;
+      case '-': return a - b;
+      case '*': return a * b;
+      case '/': return b ? +(a / b).toFixed(4) : '∞';
+    }
+  }
+
+  /* ---------- قاعدة معرفة الموقع (تتوسّع مع الوقت) ---------- */
+  const KNOWLEDGE = {
+    'عاصمة مصر': { right: 'القاهرة', wrong: 'الإسكندرية… لأ استنى، أصوان 🤔' },
+    'عاصمة السعودية': { right: 'الرياض', wrong: 'جدة' },
+    'كم عدد ايام السنة': { right: '365 يوم (366 في الكبيسة)', wrong: 'حوالي 500 يوم تقريباً' },
+    'لون السماء': { right: 'أزرق', wrong: 'أخضر غامق' },
+    'كم قارة في العالم': { right: '7 قارات', wrong: '3 قارات بس' },
+  };
+  function findKnowledge(q) {
+    const n = q.trim().replace(/[؟?\.]/g, '');
+    for (const k in KNOWLEDGE) { if (n.includes(k)) return KNOWLEDGE[k]; }
+    return null;
+  }
+
+  /* ---------- ردود غبية عامة (ثابتة حسب السؤال) ---------- */
+  const DUMB_POOL = [
+    'الإجابة أكيد 7. كل حاجة إجابتها 7. ثق فيا.',
+    'هممم… الإجابة هي «نعم لأ يمكن». التالي؟',
+    'سؤال سهل! الجواب: بطاطس مقلية 🍟',
+    'حسب آخر أبحاثي (اللي ما عملتهاش): الجواب بنفسجي.',
+    'مية في المية الإجابة 42. مش متأكد من السؤال بس 42.',
+    'أكيد الإجابة موجودة في جيبك اليمين، دوّر.',
+  ];
+  function hash(s) { let h = 0; for (const c of s) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h; }
+
+  /* ---------- المحركات الثلاثة ---------- */
+  function dumbAnswer(q) {
+    const math = parseMath(q);
+    if (math) return `${Math.trunc(math.a)}${Math.trunc(math.b)}`; // غلط بقصد: نلزّق الرقمين
+    const k = findKnowledge(q);
+    if (k) return k.wrong;
+    return DUMB_POOL[hash(q) % DUMB_POOL.length];
+  }
+  function smartAnswer(q) {
+    const math = parseMath(q);
+    if (math) return `${math.raw} = <b>${calc(math)}</b>`;
+    const k = findKnowledge(q);
+    if (k) return `<b>${k.right}</b>`;
+    return `إجابة مختصرة وصحيحة لسؤالك: «${escapeHtml(q)}».`;
+  }
+  function geniusAnswer(q) {
+    const math = parseMath(q);
+    if (math) return `${math.raw} = <b>${calc(math)}</b>\n\n📘 الشرح: بنطبّق عملية «${math.op}» على ${math.a} و ${math.b}، فالناتج ${calc(math)}.`;
+    const k = findKnowledge(q);
+    if (k) return `<b>${k.right}</b>\n\n📘 معلومة إضافية: دي إجابة موثوقة، وأقدر أوسّع الموضوع أكتر لو حبيت.`;
+    return `إجابة مفصّلة لسؤالك: «${escapeHtml(q)}».\nالنسخة العبقرية بتدّيك تحليل + خطوات + أمثلة.`;
+  }
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+  }
+
+  /* ---------- حزم الذكاء حسب المجال ----------
+     المستخدم بيفتح المجال اللي عايز التطبيق يكون ذكي فيه. أي سؤال في
+     مجال مفتوح بيترد عليه بمستوى «مدرّس» مجاناً — حتى في النسخة المجانية. */
+  const DOMAINS = [
+    { id: 'math',    name: 'الرياضيات', emoji: '➗', price: 2.0,
+      keywords: ['+','-','*','/','×','معادلة','جذر','نسبة','مساحة','محيط','احسب','كام','جمع','طرح','ضرب','قسمة'] },
+    { id: 'science', name: 'العلوم', emoji: '🔬', price: 2.0,
+      keywords: ['نيوتن','جاذبية','ذرة','خلية','طاقة','سرعة','كتلة','كيمياء','فيزياء','أحياء','تفاعل','كوكب'] },
+    { id: 'code',    name: 'البرمجة', emoji: '💻', price: 3.0,
+      keywords: ['كود','برمجة','function','دالة','بايثون','python','javascript','حلقة','loop','مصفوفة','array','خطأ','bug'] },
+    { id: 'lang',    name: 'اللغات', emoji: '🗣️', price: 2.0,
+      keywords: ['ترجم','معنى','translate','بالانجليزي','بالعربي','قواعد','grammar','جملة','كلمة'] },
+  ];
+  function detectDomain(q) {
+    const t = q.toLowerCase();
+    if (parseMath(q)) return 'math';
+    for (const d of DOMAINS) { if (d.keywords.some(k => t.includes(k.toLowerCase()))) return d.id; }
+    return null;
+  }
+  function domainName(id) { const d = DOMAINS.find(x => x.id === id); return d ? `${d.emoji} ${d.name}` : id; }
+  function tutorAnswer(q, domainId) {
+    const base = geniusAnswer(q); // إجابة صح + شرح
+    const note = {
+      math: '🧮 نصيحة المدرّس: راجع خطوات الحل بنفسك بعد كده عشان تثبت.',
+      science: '🔬 المدرّس: حاول تربط المفهوم ده بمثال من حياتك اليومية.',
+      code: '💻 المدرّس: جرّب تكتب الكود بنفسك وتشغّله — التعلّم بالممارسة.',
+      lang: '🗣️ المدرّس: استخدم الكلمة في جملة جديدة عشان تفتكرها.',
+    }[domainId] || '';
+    return `${base}\n\n${note}`;
+  }
+
+  /* ---------- الواجهة الموحّدة ----------
+     opts.domains = مصفوفة مجالات مفتوحة. لو السؤال في مجال مفتوح،
+     بيترد عليه بمستوى مدرّس مجاناً مهما كانت الطبقة. */
+  function ask(question, tier, opts) {
+    opts = opts || {};
+    const unlocked = opts.domains || [];
+    const dom = detectDomain(question);
+    if (dom && unlocked.includes(dom)) {
+      return { tier: 'domain', domain: dom, free: true, html: tutorAnswer(question, dom),
+        tag: `📚 حزمة ${domainName(dom)}` };
+    }
+    switch (tier) {
+      case 'smart': return { tier, html: smartAnswer(question) };
+      case 'genius': return { tier, html: geniusAnswer(question) };
+      default: return { tier: 'free', html: dumbAnswer(question), warning: 'النسخة المجانية — غالباً غلط' };
+    }
+  }
+
+  const ZakaAI = { ask, dumbAnswer, smartAnswer, geniusAnswer, tutorAnswer,
+    parseMath, calc, escapeHtml, KNOWLEDGE, DOMAINS, detectDomain, domainName };
+
+  // يشتغل في المتصفح (window.ZakaAI) وفي Node (module.exports)
+  if (typeof module !== 'undefined' && module.exports) module.exports = ZakaAI;
+  else root.ZakaAI = ZakaAI;
+})(typeof self !== 'undefined' ? self : this);
+
+</script>
+<script>
+/* ============================================================
+   ZakaAI — منطق المحفظة والربح (جانب السيرفر)
+   ------------------------------------------------------------
+   في تطبيق حقيقي، الخصم والتحقق من الرصيد لازم يحصلوا في السيرفر
+   مش في المتصفح (عشان حد ما يغشّش الرصيد من الـconsole). الموديول ده
+   بيحط منطق المحفظة في مكان واحد آمن، بيستخدمه server.js.
+
+   بيشتغل في Node (module.exports) وفي المتصفح (window.ZakaWallet).
+============================================================ */
+(function (root) {
+  'use strict';
+  const ZakaAI = (typeof require !== 'undefined') ? require('./engine.js') : root.ZakaAI;
+
+  const PRICE = { smart: 0.10, genius: 0.30, videoSub: 10.00 };
+  const VIDEO_DAILY_SECONDS = 300;
+  const AD_REVENUE = 0.004;
+
+  function newAccount() {
+    return {
+      balance: 2.00, diamonds: 50,
+      videoSub: false, videoSecondsLeft: VIDEO_DAILY_SECONDS, lastDay: today(),
+      domains: {}, ledger: [],
+      stats: { revenue: 0, adImpressions: 0, adRevenue: 0, questions: 0, videos: 0 },
+    };
+  }
+  function today() { return new Date().toISOString().slice(0, 10); }
+
+  function logTx(a, type, label, amount) {
+    a.ledger.unshift({ t: Date.now(), type, label, amount, balance: +a.balance.toFixed(2) });
+    if (a.ledger.length > 100) a.ledger.length = 100;
+  }
+  function refreshIfNewDay(a) {
+    if (a.videoSub && a.lastDay !== today()) { a.videoSecondsLeft = VIDEO_DAILY_SECONDS; a.lastDay = today(); }
+  }
+
+  // خصم من المستخدم = دخل للموقع. بيرمي خطأ لو الرصيد مش كفاية.
+  function charge(a, amount, label) {
+    if (a.balance < amount) { const e = new Error('INSUFFICIENT_FUNDS'); e.code = 'INSUFFICIENT_FUNDS'; throw e; }
+    a.balance = +(a.balance - amount).toFixed(4);
+    a.stats.revenue = +(a.stats.revenue + amount).toFixed(4);
+    logTx(a, 'charge', label, -amount);
+  }
+  function topup(a, dollars, diamonds) {
+    a.balance = +(a.balance + dollars).toFixed(4);
+    a.diamonds += (diamonds || 0);
+    logTx(a, 'topup', `شحن محفظة (+${diamonds || 0}💎)`, dollars);
+    return a;
+  }
+  function recordAd(a) {
+    a.stats.adImpressions++;
+    a.stats.adRevenue = +(a.stats.adRevenue + AD_REVENUE).toFixed(4);
+    a.stats.revenue = +(a.stats.revenue + AD_REVENUE).toFixed(4);
+    logTx(a, 'ad', 'ظهور إعلان (نسخة مجانية)', AD_REVENUE);
+    return a;
+  }
+  function unlockDomain(a, id) {
+    const d = (ZakaAI.DOMAINS || []).find(x => x.id === id);
+    if (!d) { const e = new Error('UNKNOWN_DOMAIN'); e.code = 'UNKNOWN_DOMAIN'; throw e; }
+    if (a.domains[id]) return a; // مفتوح بالفعل
+    charge(a, d.price, `حزمة ذكاء: ${d.name}`);
+    a.domains[id] = true;
+    return a;
+  }
+  function subscribeVideo(a) {
+    if (a.videoSub) return a;
+    charge(a, PRICE.videoSub, 'اشتراك استوديو الفيديو (شهري)');
+    a.videoSub = true; a.videoSecondsLeft = VIDEO_DAILY_SECONDS; a.lastDay = today();
+    return a;
+  }
+
+  // السؤال: بيطبّق قواعد الطبقات + المجالات + الخصم، ويرجّع الرد + الرصيد الجديد.
+  function ask(a, question, tier) {
+    refreshIfNewDay(a);
+    const unlocked = Object.keys(a.domains).filter(k => a.domains[k]);
+    const dom = ZakaAI.detectDomain(question);
+
+    // مجال مفتوح → رد مدرّس مجاني
+    if (dom && unlocked.includes(dom)) {
+      a.stats.questions++;
+      const r = ZakaAI.ask(question, tier, { domains: unlocked });
+      return Object.assign(r, { cost: 0, balance: a.balance });
+    }
+    if (tier === 'free') {
+      return Object.assign(ZakaAI.ask(question, 'free'), { cost: 0, balance: a.balance });
+    }
+    const cost = PRICE[tier] || 0;
+    charge(a, cost, `سؤال ${tier}`); // بيرمي لو مش كفاية
+    a.stats.questions++;
+    return Object.assign(ZakaAI.ask(question, tier), { cost, balance: a.balance });
+  }
+
+  const ZakaWallet = {
+    PRICE, VIDEO_DAILY_SECONDS, AD_REVENUE,
+    newAccount, charge, topup, recordAd, unlockDomain, subscribeVideo, ask, refreshIfNewDay,
+  };
+  if (typeof module !== 'undefined' && module.exports) module.exports = ZakaWallet;
+  else root.ZakaWallet = ZakaWallet;
+})(typeof self !== 'undefined' ? self : this);
+
+</script>
+<script>
+/* ============================================================
+   State
+============================================================ */
+const PRICE = { smart:0.10, genius:0.30, explainUnlock:0.50, videoSub:10.00 };
+const VIDEO_DAILY_SECONDS = 300; // 5 دقائق كحد أقصى لليوم
+const AD_REVENUE = 0.004;        // دخل تقديري لكل ظهور إعلان (CPM ~ $4)
+const STORE_KEY = 'zaka_ai_state_v1';
+
+const DEFAULT_STATE = {
+  tier: 'free',
+  balance: 2.00,
+  diamonds: 50,
+  videoSub: false,
+  videoSecondsLeft: VIDEO_DAILY_SECONDS,
+  adShownThisChat: false,
+  lastDay: today(),                // لتجديد رصيد الفيديو يومياً
+  domains: {},                     // المجالات المفتوحة (حزم الذكاء)
+  ledger: [],                      // سجل كل المعاملات
+  stats: { revenue:0, adImpressions:0, adRevenue:0, questions:0, videos:0 },
+};
+
+function today(){ return new Date().toISOString().slice(0,10); }
+
+/* ---------- تحميل/حفظ الحالة ---------- */
+function loadState(){
+  let s;
+  try { s = JSON.parse(localStorage.getItem(STORE_KEY)); } catch { s = null; }
+  s = Object.assign({}, DEFAULT_STATE, s || {});
+  s.stats = Object.assign({}, DEFAULT_STATE.stats, s.stats || {});
+  // تجديد رصيد الفيديو لو اتغيّر اليوم
+  if (s.videoSub && s.lastDay !== today()) { s.videoSecondsLeft = VIDEO_DAILY_SECONDS; s.lastDay = today(); }
+  s.adShownThisChat = false; // إعلان جديد لكل جلسة شات
+  return s;
+}
+function saveState(){ try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch {} }
+
+const state = loadState();
+
+/* ---------- معاملات مالية: نفس wallet.js اللي بيستخدمه السيرفر ----------
+   الواجهة بقت غلاف رفيع فوق ZakaWallet — مصدر واحد للحقيقة، نفس قواعد
+   الخصم في المتصفح والسيرفر. logTx/charge/recordAd كلها جوّه wallet.js. */
+function commit(){ saveState(); render(); }
+function charge(amount, label){ ZakaWallet.charge(state, amount, label); commit(); } // ممكن يرمي INSUFFICIENT_FUNDS
+function recordAd(){ ZakaWallet.recordAd(state); commit(); }
+
+/* ============================================================
+   المحرك بييجي من engine.js (ZakaAI) — نفسه اللي بيستخدمه السيرفر.
+   هنا بس بنغلّفه عشان الواجهة. لو الملف مش متحمّل لأي سبب،
+   فيه fallback بسيط عشان الصفحة تفضل شغّالة standalone.
+============================================================ */
+const AI = window.ZakaAI || {
+  ask:(q,t)=>({tier:t||'free',html:'(engine.js مش متحمّل) — '+esc(q)})
+};
+function dumbAnswer(q){ return AI.ask(q,'free').html; }
+function smartAnswer(q, genius){ return AI.ask(q, genius?'genius':'smart').html; }
+
+/* ============================================================
+   Chat
+============================================================ */
+const chatEl = document.getElementById('chat');
+function esc(s){return s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
+
+function addMsg(text, who, opts={}){
+  const d = document.createElement('div');
+  d.className = `msg ${who}` + (opts.dumb?' dumb':'');
+  const tag = opts.tag ? `<span class="tag">${opts.tag}</span>` : '';
+  d.innerHTML = tag + text.replace(/\n/g,'<br>');
+  if(opts.upsellHtml){
+    const u = document.createElement('div'); u.className='upsell'; u.innerHTML=opts.upsellHtml;
+    d.appendChild(u);
+  }
+  chatEl.appendChild(d);
+  chatEl.scrollTop = chatEl.scrollHeight;
+  return d;
+}
+
+function newChat(){
+  chatEl.innerHTML='';
+  state.adShownThisChat = false;
+  addMsg('أهلاً 👋 اسألني أي حاجة. اختار مستوى الذكاء من فوق.','bot',{tag:'ذكا'});
+}
+
+function unlockedDomains(){ return Object.keys(state.domains).filter(k=>state.domains[k]); }
+
+function send(){
+  const inp = document.getElementById('input');
+  const q = inp.value.trim();
+  if(!q) return;
+
+  // سؤال في مجال مفتوح → بيترد عليه مجاناً وبدون إعلان
+  const dom = AI.detectDomain ? AI.detectDomain(q) : null;
+  const isUnlockedDomain = dom && unlockedDomains().includes(dom);
+
+  // إعلان لكل شات في النسخة المجانية (إلا لو مجال مفتوح)
+  if(state.tier==='free' && !state.adShownThisChat && !isUnlockedDomain){
+    pendingQuestion = q; inp.value='';
+    showAd();
+    return;
+  }
+  inp.value='';
+  doAnswer(q);
+}
+
+let pendingQuestion = null;
+function doAnswer(q){
+  addMsg(esc(q),'user');
+
+  // نفس منطق السيرفر: ZakaWallet.ask بيطبّق المجالات + الطبقات + الخصم
+  let res;
+  try { res = ZakaWallet.ask(state, q, state.tier); }
+  catch(e){
+    if(e && e.code==='INSUFFICIENT_FUNDS'){
+      const cost = PRICE[state.tier];
+      addMsg(`محتاج <b>$${cost.toFixed(2)}</b> للإجابة بمستوى «${tierName(state.tier)}» ورصيدك مش كفاية.`,'bot',
+        {tag:'⚠️', upsellHtml:`<button class="btn gold" onclick="openStore()">＋ اشحن رصيد</button>`});
+      return;
+    }
+    throw e;
+  }
+  commit(); // حفظ الخصم/الإحصائيات + إعادة الرسم
+
+  // مجال مفتوح → رد بمستوى «مدرّس» مجاناً
+  if(res.tier==='domain'){ addMsg(res.html,'bot',{tag:res.tag}); return; }
+
+  // النسخة المجانية → رد غبي + زر ترقية
+  if(res.tier==='free'){
+    addMsg(res.html,'bot',{
+      dumb:true, tag:'🥔 النسخة المجانية (غالباً غلط)',
+      upsellHtml:`<button class="btn primary" onclick="upgradeAnswer('${encodeURIComponent(q)}')">
+        🧠 هات الإجابة الصح بـ $0.10</button>`
+    });
+    return;
+  }
+
+  // ذكي/عبقري → اتخصم جوّه ZakaWallet.ask
+  addMsg(res.html,'bot',{tag:`${state.tier==='genius'?'💎 عبقري':'🧠 ذكي'} · خُصم $${res.cost.toFixed(2)}`});
+}
+
+function upgradeAnswer(encQ){
+  const q = decodeURIComponent(encQ);
+  if(state.balance < PRICE.smart){
+    toast('رصيدك مش كفاية — اشحن الأول'); openStore(); return;
+  }
+  charge(PRICE.smart, 'ترقية إجابة للصح');
+  state.stats.questions++;
+  const ans = smartAnswer(q, false);
+  addMsg(ans,'bot',{tag:`🧠 الإجابة الصح · خُصم $${PRICE.smart.toFixed(2)}`});
+  toast('تم! شُفت الفرق؟ 😏');
+}
+
+/* ============================================================
+   Tier selection
+============================================================ */
+function tierName(t){return {free:'مجاني',smart:'ذكي',genius:'عبقري'}[t]}
+function selectTier(t){
+  state.tier=t;
+  document.querySelectorAll('.tier').forEach(e=>e.classList.toggle('active',e.dataset.tier===t));
+  render();
+}
+
+/* ============================================================
+   Ad modal
+============================================================ */
+function showAd(){
+  let left=5;
+  const m = document.getElementById('modal');
+  m.innerHTML = `
+    <span class="x" onclick="event.stopPropagation()">✕</span>
+    <h3>📢 إعلان</h3>
+    <p style="color:var(--muted);font-size:13px;margin:4px 0 0">إعلان واحد قبل كل شات في النسخة المجانية.</p>
+    <div class="ad-box">
+      اشترِ بطاطس ذكية الآن! 🥔✨
+      <small>«البطاطس اللي بتفكر بدالك»</small>
+      <span class="skip" id="skip">تخطّي بعد ${left}…</span>
+    </div>
+    <button class="btn primary" id="adContinue" disabled style="width:100%;opacity:.5">
+      استنى ${left} ثواني…</button>
+    <button class="btn gold" style="width:100%;margin-top:8px" onclick="closeOverlay();selectTier('smart');toast('شيل الإعلانات بالترقية 🧠')">
+      🚫 شيل الإعلانات — رقّي لـ Smart</button>`;
+  document.getElementById('overlay').classList.add('show');
+  const t = setInterval(()=>{
+    left--;
+    const sk=document.getElementById('skip'), bt=document.getElementById('adContinue');
+    if(!bt){clearInterval(t);return;}
+    if(left<=0){
+      clearInterval(t);
+      sk.textContent='تخطّي ✓';
+      bt.disabled=false; bt.style.opacity=1; bt.textContent='كمّل للشات ←';
+      bt.onclick=()=>{ closeOverlay(); state.adShownThisChat=true; recordAd(); if(pendingQuestion){doAnswer(pendingQuestion);pendingQuestion=null;} };
+    }else{
+      sk.textContent=`تخطّي بعد ${left}…`; bt.textContent=`استنى ${left} ثواني…`;
+    }
+  },1000);
+}
+
+/* ============================================================
+   Store / top-up
+============================================================ */
+function openStore(){
+  const m=document.getElementById('modal');
+  m.innerHTML = `
+    <span class="x" onclick="closeOverlay()">✕</span>
+    <h3>💳 اشحن المحفظة</h3>
+    <p style="color:var(--muted);font-size:13px;margin:4px 0 0">اختر باقة (محاكاة — مش دفع حقيقي).</p>
+    <div class="store-grid">
+      <div class="store-item" onclick="topup(1,10)"><div class="em">🪙</div>باقة صغيرة<div class="p">$1 · +10💎</div></div>
+      <div class="store-item" onclick="topup(5,60)"><div class="em">💰</div>باقة متوسطة<div class="p">$5 · +60💎</div></div>
+      <div class="store-item" onclick="topup(10,150)"><div class="em">🏆</div>باقة كبيرة<div class="p">$10 · +150💎</div></div>
+      <div class="store-item" onclick="subscribeVideo()"><div class="em">🎬</div>اشتراك فيديو<div class="p">$10/شهر</div></div>
+    </div>`;
+  document.getElementById('overlay').classList.add('show');
+}
+function topup(d,dia){ ZakaWallet.topup(state,d,dia); commit(); closeOverlay(); toast(`تم إضافة $${d.toFixed(2)} و ${dia}💎`); }
+function closeOverlay(){ document.getElementById('overlay').classList.remove('show'); }
+document.getElementById('overlay').addEventListener('click',e=>{ if(e.target.id==='overlay') closeOverlay(); });
+
+/* ============================================================
+   Video studio
+============================================================ */
+function subscribeVideo(){
+  if(state.videoSub){ toast('انت مشترك بالفعل ✓'); return; }
+  if(state.balance < PRICE.videoSub){ toast('رصيدك مش كفاية لاشتراك الفيديو'); openStore(); return; }
+  ZakaWallet.subscribeVideo(state); commit();
+  closeOverlay(); toast('🎬 اتفعّل اشتراك الفيديو! 5 دقائق يومياً');
+}
+function renderVideo(){
+  const body=document.getElementById('videoBody');
+  const chip=document.getElementById('videoStateChip');
+  if(!state.videoSub){
+    chip.textContent='🔒 غير مشترك';
+    body.innerHTML=`<div class="video-lock">
+      <div class="big">🎬🔒</div>
+      <h3>توليد الفيديوهات — اشتراك شهري</h3>
+      <p style="color:var(--muted);font-size:13px;max-width:340px;margin:8px auto">
+        $10/شهر · فيديو لحد <b>5 دقائق</b> كحد أقصى · رصيد يومي <b>يترفرش كل يوم</b>.</p>
+      <button class="btn gold" onclick="subscribeVideo()">اشترك بـ $10/شهر</button>
+    </div>`;
+    return;
+  }
+  chip.textContent='✅ مشترك';
+  const mins=Math.floor(state.videoSecondsLeft/60), secs=state.videoSecondsLeft%60;
+  const pct=Math.round(state.videoSecondsLeft/VIDEO_DAILY_SECONDS*100);
+  body.innerHTML=`<div class="vstudio">
+    <div class="vrow"><label>رصيد اليوم:</label>
+      <b style="color:var(--good)">${mins}:${String(secs).padStart(2,'0')} متبقية</b>
+      <button class="btn" style="margin-inline-start:auto" onclick="refreshDaily()">🔄 ريفريش يومي</button></div>
+    <div class="meter"><i style="width:${pct}%"></i></div>
+    <div class="vrow" style="margin-top:14px">
+      <label>المدة المطلوبة:</label>
+      <input type="range" id="vlen" min="5" max="${Math.max(5,state.videoSecondsLeft)}" value="${Math.min(30,state.videoSecondsLeft)}"
+        oninput="document.getElementById('vlenval').textContent=this.value+'ث'">
+      <b id="vlenval">${Math.min(30,state.videoSecondsLeft)}ث</b></div>
+    <input id="vprompt" placeholder="وصف الفيديو… (مثلاً: شرح متحرك لقانون نيوتن)"
+      style="width:100%;background:var(--bg);border:1px solid var(--line);color:var(--text);padding:10px;border-radius:10px;font-family:inherit">
+    <button class="btn primary" style="width:100%;margin-top:10px" onclick="genVideo()">✨ ولّد الفيديو</button>
+    <div class="vresult" id="vresult">
+      <div class="vplayer"><div class="play">▶</div><span class="dur" id="vdur"></span></div>
+    </div>
+  </div>`;
+}
+function refreshDaily(){ state.videoSecondsLeft=VIDEO_DAILY_SECONDS; state.lastDay=today(); commit(); toast('🔄 اترفرش رصيد اليوم: 5 دقائق'); }
+let gening=false;
+function genVideo(){
+  if(gening) return;
+  const len=+document.getElementById('vlen').value;
+  if(len>state.videoSecondsLeft){ toast('المدة أكبر من رصيدك المتبقي'); return; }
+  gening=true;
+  const btn=event.target; const orig=btn.textContent; btn.disabled=true;
+  let p=0;
+  const t=setInterval(()=>{
+    p+=Math.random()*22; if(p>=100){p=100;}
+    btn.textContent=`⏳ بيتولّد… ${Math.round(p)}%`;
+    if(p>=100){
+      clearInterval(t); gening=false; btn.disabled=false; btn.textContent=orig;
+      state.videoSecondsLeft-=len; state.stats.videos++;
+      commit();
+      const r2=document.getElementById('vresult');
+      if(r2){ r2.style.display='block';
+        const dd=document.getElementById('vdur'); if(dd) dd.textContent=`${Math.floor(len/60)}:${String(len%60).padStart(2,'0')}`; }
+      toast(`🎬 اتعمل فيديو ${len} ثانية · خُصم من رصيد اليوم`);
+    }
+  },180);
+}
+
+/* ============================================================
+   Render + toast
+============================================================ */
+function toast(msg){
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),2600);
+}
+function render(){
+  document.getElementById('balance').textContent='$'+state.balance.toFixed(2);
+  document.getElementById('diamonds').textContent=state.diamonds;
+  const hints={
+    free:'🥔 النسخة المجانية: إجابات غلط بقصد + إعلان لكل شات. رقّي عشان الذكاء الحقيقي.',
+    smart:'🧠 ذكي: $0.10 لكل سؤال — إجابات صح بدون إعلانات.',
+    genius:'💎 عبقري: $0.30 لكل سؤال — إجابة + شرح وخطوات.'
+  };
+  document.getElementById('modeHint').textContent=hints[state.tier];
+  renderVideo();
+  renderEarnings();
+  renderDomains();
+}
+
+/* ============================================================
+   Domain intelligence packs
+============================================================ */
+function renderDomains(){
+  const el=document.getElementById('domains'); if(!el) return;
+  const packs=(AI.DOMAINS||[]).map(d=>{
+    const owned=!!state.domains[d.id];
+    return `<div class="pack ${owned?'owned':''}">
+      <div class="pe">${d.emoji}</div>
+      <div class="pn">${d.name}</div>
+      ${owned
+        ? '<div class="pok">✅ مفتوح</div>'
+        : `<button class="btn gold" onclick="unlockDomain('${d.id}')">افتح · $${d.price.toFixed(2)}</button>`}
+    </div>`;
+  }).join('');
+  el.innerHTML=`<div class="packs">${packs}</div>
+    <p class="hint" style="padding:0 16px 14px;margin:0">جرّب تفتح «الرياضيات» وبعدها اسأل <b>1+1</b> في النسخة المجانية — هتلاقيها بقت بترد صح وبشرح 😉</p>`;
+}
+function unlockDomain(id){
+  const d=(AI.DOMAINS||[]).find(x=>x.id===id); if(!d) return;
+  if(state.domains[id]){ toast('المجال ده مفتوح بالفعل ✓'); return; }
+  if(state.balance < d.price){ toast('رصيدك مش كفاية — اشحن الأول'); openStore(); return; }
+  ZakaWallet.unlockDomain(state, id); commit();
+  toast(`📚 اتفتحت حزمة ${d.name}! كل أسئلتها بقت ذكية ومجانية`);
+}
+
+/* ============================================================
+   Earnings dashboard (منظور صاحب الموقع)
+============================================================ */
+const TX_ICON = { charge:'💸', topup:'➕', ad:'📢', sub:'🎬' };
+function renderEarnings(){
+  const s=state.stats;
+  const rows = state.ledger.slice(0,8).map(tx=>{
+    const sign = tx.amount>=0?'+':'';
+    const col = tx.amount>=0?'var(--good)':'var(--bad)';
+    const time = new Date(tx.t).toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});
+    return `<div class="txrow"><span>${TX_ICON[tx.type]||'•'} ${tx.label}</span>
+      <span style="color:${col}">${sign}$${Math.abs(tx.amount).toFixed(3)}</span>
+      <span class="txt">${time}</span></div>`;
+  }).join('') || '<p style="color:var(--muted);text-align:center;padding:12px">لسه مفيش معاملات — اسأل سؤال أو اشحن.</p>';
+  document.getElementById('earnings').innerHTML = `
+    <div class="stats">
+      <div class="stat"><div class="v" style="color:var(--gold)">$${s.revenue.toFixed(2)}</div><div class="l">إجمالي الدخل</div></div>
+      <div class="stat"><div class="v">${s.questions}</div><div class="l">أسئلة مدفوعة</div></div>
+      <div class="stat"><div class="v">${s.adImpressions}</div><div class="l">ظهور إعلانات</div></div>
+      <div class="stat"><div class="v" style="color:var(--good)">$${s.adRevenue.toFixed(3)}</div><div class="l">دخل الإعلانات</div></div>
+    </div>
+    <div class="txlist">${rows}</div>`;
+}
+function resetAll(){
+  if(!confirm('تصفير كل البيانات (المحفظة، الأرباح، السجل)؟')) return;
+  try{ localStorage.removeItem(STORE_KEY); }catch{}
+  location.reload();
+}
+
+/* init */
+newChat(); render();
+</script>
+</body>
+</html>
