@@ -5,7 +5,8 @@
   "description": "سيرفر جاهز (مستني) لـ ZakaAI — بدون مكتبات خارجية، Node بس",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "node --test ../test"
   },
   "engines": {
     "node": ">=16"
