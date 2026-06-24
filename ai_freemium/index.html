@@ -114,6 +114,16 @@
   .store-item:hover{border-color:var(--accent);transform:translateY(-2px)}
   .store-item .em{font-size:26px}
   .store-item .p{color:var(--gold);font-weight:700;margin-top:4px}
+  /* ---------- Domain packs ---------- */
+  .packs{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:16px}
+  .pack{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:14px 10px;text-align:center}
+  .pack.owned{border-color:var(--good);box-shadow:0 0 0 1px var(--good) inset}
+  .pack .pe{font-size:28px}
+  .pack .pn{font-size:13px;margin:6px 0 8px}
+  .pack .pok{color:var(--good);font-size:13px;font-weight:700}
+  .pack .btn{padding:6px 10px;font-size:12px}
+  @media(max-width:640px){.packs{grid-template-columns:repeat(2,1fr)}}
+
   /* ---------- Earnings dashboard ---------- */
   .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:16px}
   .stat{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center}
@@ -188,6 +198,15 @@
         <button class="btn primary" onclick="send()">إرسال</button>
       </div>
       <div class="hint" id="modeHint"></div>
+    </div>
+
+    <!-- Domain intelligence packs -->
+    <div class="card">
+      <div class="hd">
+        <h2>📚 حزم الذكاء حسب المجال</h2>
+        <span class="chip">افتح المجال = ذكاء مجاني فيه للأبد</span>
+      </div>
+      <div id="domains"></div>
     </div>
 
     <!-- Video studio card -->
@@ -319,13 +338,19 @@ function newChat(){
   addMsg('أهلاً 👋 اسألني أي حاجة. اختار مستوى الذكاء من فوق.','bot',{tag:'ذكا'});
 }
 
+function unlockedDomains(){ return Object.keys(state.domains).filter(k=>state.domains[k]); }
+
 function send(){
   const inp = document.getElementById('input');
   const q = inp.value.trim();
   if(!q) return;
 
-  // إعلان لكل شات في النسخة المجانية
-  if(state.tier==='free' && !state.adShownThisChat){
+  // سؤال في مجال مفتوح → بيترد عليه مجاناً وبدون إعلان
+  const dom = AI.detectDomain ? AI.detectDomain(q) : null;
+  const isUnlockedDomain = dom && unlockedDomains().includes(dom);
+
+  // إعلان لكل شات في النسخة المجانية (إلا لو مجال مفتوح)
+  if(state.tier==='free' && !state.adShownThisChat && !isUnlockedDomain){
     pendingQuestion = q; inp.value='';
     showAd();
     return;
@@ -337,10 +362,16 @@ function send(){
 let pendingQuestion = null;
 function doAnswer(q){
   addMsg(esc(q),'user');
+  const res = AI.ask(q, state.tier, {domains:unlockedDomains()});
 
+  // مجال مفتوح → رد بمستوى «مدرّس» مجاناً
+  if(res.tier==='domain'){
+    addMsg(res.html,'bot',{tag:res.tag});
+    state.stats.questions++; commit();
+    return;
+  }
   if(state.tier==='free'){
-    const ans = dumbAnswer(q);
-    addMsg(ans,'bot',{
+    addMsg(res.html,'bot',{
       dumb:true, tag:'🥔 النسخة المجانية (غالباً غلط)',
       upsellHtml:`<button class="btn primary" onclick="upgradeAnswer('${encodeURIComponent(q)}')">
         🧠 هات الإجابة الصح بـ $0.10</button>`
@@ -355,8 +386,7 @@ function doAnswer(q){
   }
   charge(cost, `سؤال ${tierName(state.tier)}`);
   state.stats.questions++;
-  const ans = smartAnswer(q, state.tier==='genius');
-  addMsg(ans,'bot',{tag:`${state.tier==='genius'?'💎 عبقري':'🧠 ذكي'} · خُصم $${cost.toFixed(2)}`});
+  addMsg(res.html,'bot',{tag:`${state.tier==='genius'?'💎 عبقري':'🧠 ذكي'} · خُصم $${cost.toFixed(2)}`});
 }
 
 function upgradeAnswer(encQ){
@@ -524,6 +554,34 @@ function render(){
   document.getElementById('modeHint').textContent=hints[state.tier];
   renderVideo();
   renderEarnings();
+  renderDomains();
+}
+
+/* ============================================================
+   Domain intelligence packs
+============================================================ */
+function renderDomains(){
+  const el=document.getElementById('domains'); if(!el) return;
+  const packs=(AI.DOMAINS||[]).map(d=>{
+    const owned=!!state.domains[d.id];
+    return `<div class="pack ${owned?'owned':''}">
+      <div class="pe">${d.emoji}</div>
+      <div class="pn">${d.name}</div>
+      ${owned
+        ? '<div class="pok">✅ مفتوح</div>'
+        : `<button class="btn gold" onclick="unlockDomain('${d.id}')">افتح · $${d.price.toFixed(2)}</button>`}
+    </div>`;
+  }).join('');
+  el.innerHTML=`<div class="packs">${packs}</div>
+    <p class="hint" style="padding:0 16px 14px;margin:0">جرّب تفتح «الرياضيات» وبعدها اسأل <b>1+1</b> في النسخة المجانية — هتلاقيها بقت بترد صح وبشرح 😉</p>`;
+}
+function unlockDomain(id){
+  const d=(AI.DOMAINS||[]).find(x=>x.id===id); if(!d) return;
+  if(state.domains[id]){ toast('المجال ده مفتوح بالفعل ✓'); return; }
+  if(state.balance < d.price){ toast('رصيدك مش كفاية — اشحن الأول'); openStore(); return; }
+  state.domains[id]=true;
+  charge(d.price, `حزمة ذكاء: ${d.name}`);
+  toast(`📚 اتفتحت حزمة ${d.name}! كل أسئلتها بقت ذكية ومجانية`);
 }
 
 /* ============================================================
