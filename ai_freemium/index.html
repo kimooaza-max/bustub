@@ -114,6 +114,16 @@
   .store-item:hover{border-color:var(--accent);transform:translateY(-2px)}
   .store-item .em{font-size:26px}
   .store-item .p{color:var(--gold);font-weight:700;margin-top:4px}
+  /* ---------- Earnings dashboard ---------- */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:16px}
+  .stat{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center}
+  .stat .v{font-size:20px;font-weight:700}
+  .stat .l{font-size:11px;color:var(--muted);margin-top:4px}
+  .txlist{padding:0 16px 16px;display:flex;flex-direction:column;gap:6px}
+  .txrow{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13px;
+    background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:8px 11px}
+  .txrow .txt{color:var(--muted);font-size:11px;min-width:42px;text-align:left}
+  @media(max-width:640px){.stats{grid-template-columns:repeat(2,1fr)}}
   .x{cursor:pointer;color:var(--muted);font-size:20px;float:left}
   .toast{position:fixed;bottom:20px;right:20px;background:var(--panel2);border:1px solid var(--line);
     padding:12px 16px;border-radius:12px;z-index:80;box-shadow:var(--shadow);display:none;font-size:14px}
@@ -188,6 +198,15 @@
       </div>
       <div id="videoBody"></div>
     </div>
+
+    <!-- Earnings / revenue dashboard -->
+    <div class="card">
+      <div class="hd">
+        <h2>📊 لوحة الأرباح (منظور الموقع)</h2>
+        <button class="btn" onclick="resetAll()">↺ تصفير</button>
+      </div>
+      <div id="earnings"></div>
+    </div>
   </div>
 
   <p style="text-align:center;color:var(--muted);font-size:12px;margin-top:22px">
@@ -210,15 +229,58 @@
 ============================================================ */
 const PRICE = { smart:0.10, genius:0.30, explainUnlock:0.50, videoSub:10.00 };
 const VIDEO_DAILY_SECONDS = 300; // 5 دقائق كحد أقصى لليوم
+const AD_REVENUE = 0.004;        // دخل تقديري لكل ظهور إعلان (CPM ~ $4)
+const STORE_KEY = 'zaka_ai_state_v1';
 
-const state = {
+const DEFAULT_STATE = {
   tier: 'free',
   balance: 2.00,
   diamonds: 50,
   videoSub: false,
   videoSecondsLeft: VIDEO_DAILY_SECONDS,
   adShownThisChat: false,
+  lastDay: today(),                // لتجديد رصيد الفيديو يومياً
+  domains: {},                     // المجالات المفتوحة (حزم الذكاء)
+  ledger: [],                      // سجل كل المعاملات
+  stats: { revenue:0, adImpressions:0, adRevenue:0, questions:0, videos:0 },
 };
+
+function today(){ return new Date().toISOString().slice(0,10); }
+
+/* ---------- تحميل/حفظ الحالة ---------- */
+function loadState(){
+  let s;
+  try { s = JSON.parse(localStorage.getItem(STORE_KEY)); } catch { s = null; }
+  s = Object.assign({}, DEFAULT_STATE, s || {});
+  s.stats = Object.assign({}, DEFAULT_STATE.stats, s.stats || {});
+  // تجديد رصيد الفيديو لو اتغيّر اليوم
+  if (s.videoSub && s.lastDay !== today()) { s.videoSecondsLeft = VIDEO_DAILY_SECONDS; s.lastDay = today(); }
+  s.adShownThisChat = false; // إعلان جديد لكل جلسة شات
+  return s;
+}
+function saveState(){ try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch {} }
+
+const state = loadState();
+
+/* ---------- معاملات مالية مركزية ---------- */
+function logTx(type, label, amount){
+  state.ledger.unshift({ t: Date.now(), type, label, amount, balance: +state.balance.toFixed(2) });
+  if (state.ledger.length > 100) state.ledger.length = 100;
+}
+function commit(){ saveState(); render(); }
+function charge(amount, label){            // خصم من المستخدم = دخل للموقع
+  state.balance -= amount;
+  state.stats.revenue += amount;
+  logTx('charge', label, -amount);
+  commit();
+}
+function recordAd(){
+  state.stats.adImpressions++;
+  state.stats.adRevenue += AD_REVENUE;
+  state.stats.revenue   += AD_REVENUE;
+  logTx('ad', 'ظهور إعلان (نسخة مجانية)', AD_REVENUE);
+  commit();
+}
 
 /* ============================================================
    المحرك بييجي من engine.js (ZakaAI) — نفسه اللي بيستخدمه السيرفر.
@@ -291,7 +353,8 @@ function doAnswer(q){
       {tag:'⚠️', upsellHtml:`<button class="btn gold" onclick="openStore()">＋ اشحن رصيد</button>`});
     return;
   }
-  state.balance -= cost; render();
+  charge(cost, `سؤال ${tierName(state.tier)}`);
+  state.stats.questions++;
   const ans = smartAnswer(q, state.tier==='genius');
   addMsg(ans,'bot',{tag:`${state.tier==='genius'?'💎 عبقري':'🧠 ذكي'} · خُصم $${cost.toFixed(2)}`});
 }
@@ -301,7 +364,8 @@ function upgradeAnswer(encQ){
   if(state.balance < PRICE.smart){
     toast('رصيدك مش كفاية — اشحن الأول'); openStore(); return;
   }
-  state.balance -= PRICE.smart; render();
+  charge(PRICE.smart, 'ترقية إجابة للصح');
+  state.stats.questions++;
   const ans = smartAnswer(q, false);
   addMsg(ans,'bot',{tag:`🧠 الإجابة الصح · خُصم $${PRICE.smart.toFixed(2)}`});
   toast('تم! شُفت الفرق؟ 😏');
@@ -345,7 +409,7 @@ function showAd(){
       clearInterval(t);
       sk.textContent='تخطّي ✓';
       bt.disabled=false; bt.style.opacity=1; bt.textContent='كمّل للشات ←';
-      bt.onclick=()=>{ closeOverlay(); state.adShownThisChat=true; if(pendingQuestion){doAnswer(pendingQuestion);pendingQuestion=null;} };
+      bt.onclick=()=>{ closeOverlay(); state.adShownThisChat=true; recordAd(); if(pendingQuestion){doAnswer(pendingQuestion);pendingQuestion=null;} };
     }else{
       sk.textContent=`تخطّي بعد ${left}…`; bt.textContent=`استنى ${left} ثواني…`;
     }
@@ -369,7 +433,7 @@ function openStore(){
     </div>`;
   document.getElementById('overlay').classList.add('show');
 }
-function topup(d,dia){ state.balance+=d; state.diamonds+=dia; render(); closeOverlay(); toast(`تم إضافة $${d.toFixed(2)} و ${dia}💎`); }
+function topup(d,dia){ state.balance+=d; state.diamonds+=dia; logTx('topup',`شحن محفظة (+${dia}💎)`,d); commit(); closeOverlay(); toast(`تم إضافة $${d.toFixed(2)} و ${dia}💎`); }
 function closeOverlay(){ document.getElementById('overlay').classList.remove('show'); }
 document.getElementById('overlay').addEventListener('click',e=>{ if(e.target.id==='overlay') closeOverlay(); });
 
@@ -379,8 +443,9 @@ document.getElementById('overlay').addEventListener('click',e=>{ if(e.target.id=
 function subscribeVideo(){
   if(state.videoSub){ toast('انت مشترك بالفعل ✓'); return; }
   if(state.balance < PRICE.videoSub){ toast('رصيدك مش كفاية لاشتراك الفيديو'); openStore(); return; }
-  state.balance -= PRICE.videoSub; state.videoSub=true; state.videoSecondsLeft=VIDEO_DAILY_SECONDS;
-  render(); closeOverlay(); toast('🎬 اتفعّل اشتراك الفيديو! 5 دقائق يومياً');
+  state.videoSub=true; state.videoSecondsLeft=VIDEO_DAILY_SECONDS; state.lastDay=today();
+  charge(PRICE.videoSub, 'اشتراك استوديو الفيديو (شهري)');
+  closeOverlay(); toast('🎬 اتفعّل اشتراك الفيديو! 5 دقائق يومياً');
 }
 function renderVideo(){
   const body=document.getElementById('videoBody');
@@ -417,7 +482,7 @@ function renderVideo(){
     </div>
   </div>`;
 }
-function refreshDaily(){ state.videoSecondsLeft=VIDEO_DAILY_SECONDS; renderVideo(); toast('🔄 اترفرش رصيد اليوم: 5 دقائق'); }
+function refreshDaily(){ state.videoSecondsLeft=VIDEO_DAILY_SECONDS; state.lastDay=today(); commit(); toast('🔄 اترفرش رصيد اليوم: 5 دقائق'); }
 let gening=false;
 function genVideo(){
   if(gening) return;
@@ -431,11 +496,11 @@ function genVideo(){
     btn.textContent=`⏳ بيتولّد… ${Math.round(p)}%`;
     if(p>=100){
       clearInterval(t); gening=false; btn.disabled=false; btn.textContent=orig;
-      state.videoSecondsLeft-=len;
-      const res=document.getElementById('vresult'); res.style.display='block';
-      document.getElementById('vdur').textContent=`${Math.floor(len/60)}:${String(len%60).padStart(2,'0')}`;
-      renderVideo();
-      const r2=document.getElementById('vresult'); if(r2){r2.style.display='block';}
+      state.videoSecondsLeft-=len; state.stats.videos++;
+      commit();
+      const r2=document.getElementById('vresult');
+      if(r2){ r2.style.display='block';
+        const dd=document.getElementById('vdur'); if(dd) dd.textContent=`${Math.floor(len/60)}:${String(len%60).padStart(2,'0')}`; }
       toast(`🎬 اتعمل فيديو ${len} ثانية · خُصم من رصيد اليوم`);
     }
   },180);
@@ -458,6 +523,36 @@ function render(){
   };
   document.getElementById('modeHint').textContent=hints[state.tier];
   renderVideo();
+  renderEarnings();
+}
+
+/* ============================================================
+   Earnings dashboard (منظور صاحب الموقع)
+============================================================ */
+const TX_ICON = { charge:'💸', topup:'➕', ad:'📢', sub:'🎬' };
+function renderEarnings(){
+  const s=state.stats;
+  const rows = state.ledger.slice(0,8).map(tx=>{
+    const sign = tx.amount>=0?'+':'';
+    const col = tx.amount>=0?'var(--good)':'var(--bad)';
+    const time = new Date(tx.t).toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});
+    return `<div class="txrow"><span>${TX_ICON[tx.type]||'•'} ${tx.label}</span>
+      <span style="color:${col}">${sign}$${Math.abs(tx.amount).toFixed(3)}</span>
+      <span class="txt">${time}</span></div>`;
+  }).join('') || '<p style="color:var(--muted);text-align:center;padding:12px">لسه مفيش معاملات — اسأل سؤال أو اشحن.</p>';
+  document.getElementById('earnings').innerHTML = `
+    <div class="stats">
+      <div class="stat"><div class="v" style="color:var(--gold)">$${s.revenue.toFixed(2)}</div><div class="l">إجمالي الدخل</div></div>
+      <div class="stat"><div class="v">${s.questions}</div><div class="l">أسئلة مدفوعة</div></div>
+      <div class="stat"><div class="v">${s.adImpressions}</div><div class="l">ظهور إعلانات</div></div>
+      <div class="stat"><div class="v" style="color:var(--good)">$${s.adRevenue.toFixed(3)}</div><div class="l">دخل الإعلانات</div></div>
+    </div>
+    <div class="txlist">${rows}</div>`;
+}
+function resetAll(){
+  if(!confirm('تصفير كل البيانات (المحفظة، الأرباح، السجل)؟')) return;
+  try{ localStorage.removeItem(STORE_KEY); }catch{}
+  location.reload();
 }
 
 /* init */
