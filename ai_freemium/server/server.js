@@ -19,6 +19,8 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const Wallet = require('../wallet.js'); // منطق المحفظة الآمن (بيستخدم engine.js جوّه)
+const Brain = require('./brain.js');   // نقطة وصل النموذج اللغوي الحقيقي (اختياري)
+const ZakaAI = require('../engine.js'); // للتأمين (escapeHtml)
 
 const PORT = process.env.PORT || 3000;
 const ROOT = path.join(__dirname, '..'); // فولدر ai_freemium
@@ -55,6 +57,11 @@ async function handleAsk(req, res) {
   const acc = accountFor(req);
   try {
     const result = Wallet.ask(acc, question, tier); // ← يتحقق من الرصيد ويخصم في السيرفر
+    // لو فيه موديل لغوي حقيقي متظبّط، يدّي إجابة ليها علاقة بالسؤال (مش مجاناً/غبي)
+    if (Brain.isConfigured() && (tier === 'smart' || tier === 'genius')) {
+      const real = await Brain.think(question, tier);
+      if (real) { result.html = ZakaAI.escapeHtml(real).replace(/\n/g, '<br>'); result.source = 'model'; }
+    }
     sendJson(res, 200, result);
   } catch (e) {
     if (e.code === 'INSUFFICIENT_FUNDS') return sendJson(res, 402, { error: 'الرصيد غير كافٍ', balance: acc.balance });
@@ -95,7 +102,8 @@ const server = http.createServer((req, res) => {
     if (url === '/api/ad') return handleAction(req, res, (a) => Wallet.recordAd(a));
   }
   if (req.method === 'GET') {
-    if (url === '/api/health') return sendJson(res, 200, { ok: true, engine: 'ZakaAI' });
+    if (url === '/api/health') return sendJson(res, 200, { ok: true, engine: 'ZakaAI',
+      brain: Brain.isConfigured() ? `model:${Brain.MODEL}` : 'offline (rule-engine)' });
     if (url === '/api/account') return sendJson(res, 200, accountFor(req));
     return serveStatic(req, res);
   }
