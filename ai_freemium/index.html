@@ -202,6 +202,8 @@
 </div>
 <div class="toast" id="toast"></div>
 
+<!-- محرك الذكاء الخاص بالموقع (نفس الملف بيستخدمه السيرفر) -->
+<script src="engine.js"></script>
 <script>
 /* ============================================================
    State
@@ -219,66 +221,15 @@ const state = {
 };
 
 /* ============================================================
-   "Engines": نفس السؤال — رد غبي مقابل رد ذكي
+   المحرك بييجي من engine.js (ZakaAI) — نفسه اللي بيستخدمه السيرفر.
+   هنا بس بنغلّفه عشان الواجهة. لو الملف مش متحمّل لأي سبب،
+   فيه fallback بسيط عشان الصفحة تفضل شغّالة standalone.
 ============================================================ */
-function parseMath(q){
-  const m = q.replace(/×/g,'*').replace(/x/gi,'*').match(/(-?\d+(?:\.\d+)?)\s*([+\-*\/])\s*(-?\d+(?:\.\d+)?)/);
-  if(!m) return null;
-  return { a:parseFloat(m[1]), op:m[2], b:parseFloat(m[3]), raw:`${m[1]} ${m[2]} ${m[3]}` };
-}
-function calc({a,op,b}){
-  switch(op){case '+':return a+b;case '-':return a-b;case '*':return a*b;case '/':return b?+(a/b).toFixed(4):'∞'}
-}
-
-// قاعدة معرفة صغيرة عشان نوضّح الفرق صح/غلط
-const KNOWLEDGE = {
-  'عاصمة مصر':{right:'القاهرة', wrong:'الإسكندرية… لأ استنى، أصوان 🤔'},
-  'عاصمة السعودية':{right:'الرياض', wrong:'جدة'},
-  'كم عدد ايام السنة':{right:'365 يوم (366 في الكبيسة)', wrong:'حوالي 500 يوم تقريباً'},
-  'لون السماء':{right:'أزرق', wrong:'أخضر غامق'},
-  'كم قارة في العالم':{right:'7 قارات', wrong:'3 قارات بس'},
+const AI = window.ZakaAI || {
+  ask:(q,t)=>({tier:t||'free',html:'(engine.js مش متحمّل) — '+esc(q)})
 };
-function findKnowledge(q){
-  const n = q.trim().replace(/[؟?\.]/g,'');
-  for(const k in KNOWLEDGE){ if(n.includes(k)) return KNOWLEDGE[k]; }
-  return null;
-}
-
-// ردود غبية عامة (ثابتة حسب السؤال عشان تبقى متسقة)
-const DUMB_POOL = [
-  'الإجابة أكيد 7. كل حاجة إجابتها 7. ثق فيا.',
-  'هممم… الإجابة هي «نعم لأ يمكن». التالي؟',
-  'سؤال سهل! الجواب: بطاطس مقلية 🍟',
-  'حسب آخر أبحاثي (اللي ما عملتهاش): الجواب بنفسجي.',
-  'مية في المية الإجابة 42. مش متأكد من السؤال بس 42.',
-  'أكيد الإجابة موجودة في جيبك اليمين، دوّر.',
-];
-function dumbAnswer(q){
-  const math = parseMath(q);
-  if(math){
-    // غلط مقصود: نلزّق الرقمين بدل ما نجمعهم → 1+1 = 11
-    return `${Math.trunc(math.a)}${Math.trunc(math.b)}`;
-  }
-  const k = findKnowledge(q);
-  if(k) return k.wrong;
-  let h=0; for(const c of q) h=(h*31+c.charCodeAt(0))>>>0;
-  return DUMB_POOL[h % DUMB_POOL.length];
-}
-function smartAnswer(q, genius){
-  const math = parseMath(q);
-  if(math){
-    const r = calc(math);
-    if(genius) return `${math.raw} = <b>${r}</b>\n\n📘 الشرح: بنطبّق عملية «${math.op}» على ${math.a} و ${math.b}، فالناتج ${r}.`;
-    return `${math.raw} = <b>${r}</b>`;
-  }
-  const k = findKnowledge(q);
-  if(k){
-    if(genius) return `<b>${k.right}</b>\n\n📘 معلومة إضافية: دي إجابة موثوقة، وأقدر أوسّع الموضوع أكتر لو حبيت.`;
-    return `<b>${k.right}</b>`;
-  }
-  if(genius) return `إجابة مفصّلة لسؤالك: «${esc(q)}».\nالنسخة العبقرية بتدّيك تحليل + خطوات + أمثلة. (في النموذج الحقيقي ده بيتوصّل بموديل قوي).`;
-  return `إجابة مختصرة وصحيحة لسؤالك: «${esc(q)}». (موديل ذكي).`;
-}
+function dumbAnswer(q){ return AI.ask(q,'free').html; }
+function smartAnswer(q, genius){ return AI.ask(q, genius?'genius':'smart').html; }
 
 /* ============================================================
    Chat
