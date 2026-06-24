@@ -1,0 +1,14 @@
+{
+  "name": "zaka-ai-server",
+  "version": "0.1.0",
+  "private": true,
+  "description": "سيرفر جاهز (مستني) لـ ZakaAI — بدون مكتبات خارجية، Node بس",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "cd .. && node --test"
+  },
+  "engines": {
+    "node": ">=16"
+  }
+}
